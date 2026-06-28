@@ -1,0 +1,69 @@
+<!-- @dsCard group="Repocast App" viewport="390x844" name="Repocast — Interactive" subtitle="Tracks, Now Playing, New Track, Settings — tap to explore" -->
+<!-- @startingPoint section="Repocast App" subtitle="Full Repocast iOS app — interactive recreation" viewport="390x844" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Repocast</title>
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { font-family: var(--font-text); background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; }
+  .rc-phone {
+    position: relative; width: 390px; height: 844px; overflow: hidden;
+    background: var(--bg-grouped); display: flex; flex-direction: column;
+    font-family: var(--font-text); color: var(--text-primary);
+  }
+  .rc-statusbar { height: 50px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 28px 0 32px; }
+  .rc-time { font: var(--type-subheadline); font-weight: 600; }
+  .rc-status-icons { display: flex; align-items: center; gap: 6px; color: var(--text-primary); }
+  .rc-screen { flex: 1; min-height: 0; position: relative; }
+  .rc-bottom { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; }
+
+  /* Sheets */
+  .rc-scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.28); opacity: 0; pointer-events: none; transition: opacity var(--duration-base) var(--ease-out); z-index: 10; }
+  .rc-scrim.show { opacity: 1; pointer-events: auto; }
+  .rc-sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 92%;
+    background: var(--bg); border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    box-shadow: var(--shadow-sheet); overflow: hidden; z-index: 11;
+    transform: translateY(102%); transition: transform var(--duration-base) var(--ease-standard);
+  }
+  .rc-sheet-full { height: 100%; border-radius: var(--radius-sheet) var(--radius-sheet) 0 0; }
+  .rc-sheet.up { transform: translateY(0); }
+
+  /* Spinner + pulse */
+  .rc-spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--fill); border-top-color: var(--tint); animation: rc-spin 0.8s linear infinite; }
+  @keyframes rc-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: no-preference) {
+    .rc-pulse { animation: rc-pulse 2.4s var(--ease-out) infinite; }
+  }
+  @keyframes rc-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+
+  .rc-screen ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="data.js" data-presets="env,react"></script>
+<script type="text/babel" src="TracksScreen.jsx" data-presets="env,react"></script>
+<script type="text/babel" src="SettingsScreen.jsx" data-presets="env,react"></script>
+<script type="text/babel" src="NewTrackSheet.jsx" data-presets="env,react"></script>
+<script type="text/babel" src="NowPlayingSheet.jsx" data-presets="env,react"></script>
+<script type="text/babel" src="App.jsx" data-presets="env,react"></script>
+<script type="text/babel" data-presets="env,react">
+  function mount() {
+    if (!window.RepocastApp || !window.RepocastDesignSystem_a3bb12) { setTimeout(mount, 40); return; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<window.RepocastApp />);
+    setTimeout(() => window.lucide && window.lucide.createIcons(), 80);
+  }
+  mount();
+</script>
+</body>
+</html>

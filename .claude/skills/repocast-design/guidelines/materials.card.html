@@ -1,0 +1,25 @@
+<!-- @dsCard group="Materials & Motion" viewport="700x200" name="Materials & Blur" subtitle="Frosted .regularMaterial chrome over content" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); color: var(--text-primary); }
+  .stage { position: relative; height: 200px; overflow: hidden;
+    background: repeating-linear-gradient(135deg, var(--blue) 0 22px, var(--purple) 22px 44px, var(--pink) 44px 66px); }
+  .bar { position: absolute; left: 24px; right: 24px; height: 56px; border-radius: var(--radius-lg);
+    display: flex; align-items: center; padding: 0 18px; box-sizing: border-box;
+    font: var(--type-subheadline); font-weight: 600; color: var(--text-primary);
+    border: 0.5px solid var(--separator); }
+  .thin { top: 24px; background: var(--material-thin); backdrop-filter: var(--blur-thin); -webkit-backdrop-filter: var(--blur-thin); }
+  .reg { top: 92px; background: var(--material-regular); backdrop-filter: var(--blur-regular); -webkit-backdrop-filter: var(--blur-regular); }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="bar thin">Thin material · blur 20</div>
+    <div class="bar reg">Regular material · blur 30 — nav bars, mini-player</div>
+  </div>
+</body>
+</html>

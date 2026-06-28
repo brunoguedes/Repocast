@@ -1,0 +1,31 @@
+<!-- @dsCard group="Colors" viewport="700x170" name="System Colors" subtitle="Apple's semantic color palette (light/dark adaptive)" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg); color: var(--text-primary); }
+  .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; padding: 20px; }
+  .cell { display: flex; flex-direction: column; gap: 6px; }
+  .chip { height: 52px; border-radius: var(--radius-md); }
+  .lbl { font: var(--type-caption-2); color: var(--text-secondary); }
+</style>
+</head>
+<body>
+  <div class="grid">
+    <div class="cell"><div class="chip" style="background:var(--blue)"></div><span class="lbl">Blue</span></div>
+    <div class="cell"><div class="chip" style="background:var(--green)"></div><span class="lbl">Green</span></div>
+    <div class="cell"><div class="chip" style="background:var(--indigo)"></div><span class="lbl">Indigo</span></div>
+    <div class="cell"><div class="chip" style="background:var(--orange)"></div><span class="lbl">Orange</span></div>
+    <div class="cell"><div class="chip" style="background:var(--pink)"></div><span class="lbl">Pink</span></div>
+    <div class="cell"><div class="chip" style="background:var(--purple)"></div><span class="lbl">Purple</span></div>
+    <div class="cell"><div class="chip" style="background:var(--red)"></div><span class="lbl">Red</span></div>
+    <div class="cell"><div class="chip" style="background:var(--teal)"></div><span class="lbl">Teal</span></div>
+    <div class="cell"><div class="chip" style="background:var(--yellow)"></div><span class="lbl">Yellow</span></div>
+    <div class="cell"><div class="chip" style="background:var(--mint)"></div><span class="lbl">Mint</span></div>
+    <div class="cell"><div class="chip" style="background:var(--cyan)"></div><span class="lbl">Cyan</span></div>
+    <div class="cell"><div class="chip" style="background:var(--gray)"></div><span class="lbl">Gray</span></div>
+  </div>
+</body>
+</html>

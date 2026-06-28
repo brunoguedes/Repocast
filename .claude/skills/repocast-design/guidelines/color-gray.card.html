@@ -1,0 +1,26 @@
+<!-- @dsCard group="Colors" viewport="700x130" name="Gray Ramp" subtitle="systemGray → systemGray6 neutral scale" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg); color: var(--text-primary); }
+  .row { display: flex; padding: 20px; gap: 0; }
+  .step { flex: 1; height: 72px; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box; }
+  .step:first-child { border-radius: var(--radius-md) 0 0 var(--radius-md); }
+  .step:last-child { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+  .lbl { font: var(--type-caption-2); color: var(--text-secondary); mix-blend-mode: difference; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="step" style="background:var(--gray)"><span class="lbl" style="color:#fff">Gray</span></div>
+    <div class="step" style="background:var(--gray-2)"><span class="lbl" style="color:#fff">2</span></div>
+    <div class="step" style="background:var(--gray-3)"><span class="lbl">3</span></div>
+    <div class="step" style="background:var(--gray-4)"><span class="lbl">4</span></div>
+    <div class="step" style="background:var(--gray-5)"><span class="lbl">5</span></div>
+    <div class="step" style="background:var(--gray-6)"><span class="lbl">Gray6</span></div>
+  </div>
+</body>
+</html>

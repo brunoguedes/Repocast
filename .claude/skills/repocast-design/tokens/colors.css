@@ -1,0 +1,131 @@
+/* Repocast — Color tokens
+ * Faithful to Apple's iOS 26 system palette. Base ramps + system colors are
+ * declared once; semantic aliases map them to roles. Dark mode overrides the
+ * same names under prefers-color-scheme: dark.
+ *
+ * Repocast's product accent is systemBlue (#007AFF light / #0A84FF dark) —
+ * pulled straight from the app's AccentColor.colorset.
+ */
+
+:root {
+  /* ---- System colors (light) ---- */
+  --blue: #007aff;
+  --green: #34c759;
+  --indigo: #5856d6;
+  --orange: #ff9500;
+  --pink: #ff2d55;
+  --purple: #af52de;
+  --red: #ff3b30;
+  --teal: #30b0c7;
+  --yellow: #ffcc00;
+  --mint: #00c7be;
+  --cyan: #32ade6;
+
+  /* ---- Gray ramp (light) ---- */
+  --gray: #8e8e93;
+  --gray-2: #aeaeb2;
+  --gray-3: #c7c7cc;
+  --gray-4: #d1d1d6;
+  --gray-5: #e5e5ea;
+  --gray-6: #f2f2f7;
+
+  /* ---- Label colors (light) — text on backgrounds ---- */
+  --label: rgba(0, 0, 0, 1);
+  --label-secondary: rgba(60, 60, 67, 0.6);
+  --label-tertiary: rgba(60, 60, 67, 0.3);
+  --label-quaternary: rgba(60, 60, 67, 0.18);
+
+  /* ---- Backgrounds (light) ---- */
+  --bg: #ffffff;
+  --bg-secondary: #f2f2f7;
+  --bg-tertiary: #ffffff;
+
+  /* ---- Grouped backgrounds (light) — for inset list / Form screens ---- */
+  --bg-grouped: #f2f2f7;
+  --bg-grouped-secondary: #ffffff;
+  --bg-grouped-tertiary: #f2f2f7;
+
+  /* ---- Fills (light) — for controls, chips, scrubber tracks ---- */
+  --fill: rgba(120, 120, 128, 0.2);
+  --fill-secondary: rgba(120, 120, 128, 0.16);
+  --fill-tertiary: rgba(118, 118, 128, 0.12);
+  --fill-quaternary: rgba(116, 116, 128, 0.08);
+
+  /* ---- Separators ---- */
+  --separator: rgba(60, 60, 67, 0.29);
+  --separator-opaque: #c6c6c8;
+
+  /* ================= Semantic aliases ================= */
+  /* Product tint — every interactive accent resolves here. */
+  --tint: var(--blue);
+  --tint-pressed: #0062cc;
+
+  --text-primary: var(--label);
+  --text-secondary: var(--label-secondary);
+  --text-tertiary: var(--label-tertiary);
+  --text-on-tint: #ffffff;
+  --text-destructive: var(--red);
+
+  --surface: var(--bg);
+  --surface-card: var(--bg-grouped-secondary);
+  --surface-grouped: var(--bg-grouped);
+
+  --control-fill: var(--fill-tertiary);
+  --hairline: var(--separator);
+  --icon-muted: var(--gray);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* ---- System colors (dark) ---- */
+    --blue: #0a84ff;
+    --green: #30d158;
+    --indigo: #5e5ce6;
+    --orange: #ff9f0a;
+    --pink: #ff375f;
+    --purple: #bf5af2;
+    --red: #ff453a;
+    --teal: #40c8e0;
+    --yellow: #ffd60a;
+    --mint: #66d4cf;
+    --cyan: #64d2ff;
+
+    /* ---- Gray ramp (dark) ---- */
+    --gray: #8e8e93;
+    --gray-2: #636366;
+    --gray-3: #48484a;
+    --gray-4: #3a3a3c;
+    --gray-5: #2c2c2e;
+    --gray-6: #1c1c1e;
+
+    /* ---- Label colors (dark) ---- */
+    --label: rgba(255, 255, 255, 1);
+    --label-secondary: rgba(235, 235, 245, 0.6);
+    --label-tertiary: rgba(235, 235, 245, 0.3);
+    --label-quaternary: rgba(235, 235, 245, 0.16);
+
+    /* ---- Backgrounds (dark) ---- */
+    --bg: #000000;
+    --bg-secondary: #1c1c1e;
+    --bg-tertiary: #2c2c2e;
+
+    /* ---- Grouped backgrounds (dark) ---- */
+    --bg-grouped: #000000;
+    --bg-grouped-secondary: #1c1c1e;
+    --bg-grouped-tertiary: #2c2c2e;
+
+    /* ---- Fills (dark) ---- */
+    --fill: rgba(120, 120, 128, 0.36);
+    --fill-secondary: rgba(120, 120, 128, 0.32);
+    --fill-tertiary: rgba(118, 118, 128, 0.24);
+    --fill-quaternary: rgba(118, 118, 128, 0.18);
+
+    /* ---- Separators ---- */
+    --separator: rgba(84, 84, 88, 0.6);
+    --separator-opaque: #38383a;
+
+    /* ---- Semantic overrides ---- */
+    --tint-pressed: #409cff;
+    --text-on-tint: #ffffff;
+  }
+}

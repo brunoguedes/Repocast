@@ -1,0 +1,30 @@
+<!-- @dsCard group="Type" viewport="700x150" name="Mono & Numerals" subtitle="SF Mono for code; monospaced digits for time" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg); color: var(--text-primary); }
+  .wrap { padding: 20px 24px; display: flex; gap: 32px; align-items: center; }
+  .mono { font-family: var(--font-mono); font-size: 14px; line-height: 22px; background: var(--bg-secondary); padding: 12px 16px; border-radius: var(--radius-md); color: var(--text-primary); }
+  .tok { color: var(--purple); }
+  .str { color: var(--green); }
+  .time { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 28px; font-weight: 600; }
+  .time .sep { color: var(--text-tertiary); }
+  .cap { font: var(--type-caption-1); color: var(--text-tertiary); margin-top: 6px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div>
+      <div class="mono"><span class="tok">func</span> generate() <span class="tok">async</span><br>&nbsp;&nbsp;<span class="str">"reads your text aloud"</span></div>
+      <div class="cap">SF Mono · code transcripts</div>
+    </div>
+    <div>
+      <div class="time">12:48<span class="sep"> / </span>24:30</div>
+      <div class="cap">Tabular numerals · scrubber</div>
+    </div>
+  </div>
+</body>
+</html>

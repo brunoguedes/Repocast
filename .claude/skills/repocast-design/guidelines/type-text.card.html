@@ -1,0 +1,30 @@
+<!-- @dsCard group="Type" viewport="700x260" name="Text Styles" subtitle="SF Pro Text — Headline through Caption" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg); color: var(--text-primary); }
+  .wrap { padding: 18px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .line { display: flex; align-items: baseline; gap: 16px; }
+  .spec { font: var(--type-caption-1); font-family: var(--font-mono); color: var(--text-tertiary); width: 130px; flex: none; }
+  .headline { font: var(--type-headline); }
+  .body { font: var(--type-body); }
+  .callout { font: var(--type-callout); }
+  .subhead { font: var(--type-subheadline); }
+  .foot { font: var(--type-footnote); color: var(--text-secondary); }
+  .cap { font: var(--type-caption-1); color: var(--text-secondary); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="line"><span class="spec">Headline · 17 sb</span><span class="headline">Repocast turns code into audio</span></div>
+    <div class="line"><span class="spec">Body · 17</span><span class="body">Paste text and generate a track.</span></div>
+    <div class="line"><span class="spec">Callout · 16</span><span class="callout">Reads your text aloud verbatim.</span></div>
+    <div class="line"><span class="spec">Subheadline · 15</span><span class="subhead">On-device summarization</span></div>
+    <div class="line"><span class="spec">Footnote · 13</span><span class="foot">Arrives in the next phase.</span></div>
+    <div class="line"><span class="spec">Caption · 12</span><span class="cap">12:48 · Ready</span></div>
+  </div>
+</body>
+</html>

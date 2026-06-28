@@ -1,0 +1,26 @@
+<!-- @dsCard group="Type" viewport="700x230" name="Display & Titles" subtitle="SF Pro Display — Large Title through Title 3" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg); color: var(--text-primary); }
+  .wrap { padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .line { display: flex; align-items: baseline; gap: 16px; }
+  .spec { font: var(--type-caption-1); font-family: var(--font-mono); color: var(--text-tertiary); width: 130px; flex: none; }
+  .lt { font: var(--type-large-title); letter-spacing: var(--tracking-tight); }
+  .t1 { font: var(--type-title-1); letter-spacing: var(--tracking-tight); }
+  .t2 { font: var(--type-title-2); letter-spacing: var(--tracking-normal); }
+  .t3 { font: var(--type-title-3); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="line"><span class="spec">Large Title · 34</span><span class="lt">Now Playing</span></div>
+    <div class="line"><span class="spec">Title 1 · 28</span><span class="t1">Your Tracks</span></div>
+    <div class="line"><span class="spec">Title 2 · 22</span><span class="t2">Latest Changes</span></div>
+    <div class="line"><span class="spec">Title 3 · 20</span><span class="t3">New Track</span></div>
+  </div>
+</body>
+</html>

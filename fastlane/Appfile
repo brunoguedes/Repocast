@@ -1,0 +1,5 @@
+app_identifier("au.com.bclgapps.Repocast")
+team_id("XKV3A3SLX9")
+
+# App Store Connect API key auth is configured per-lane in the Fastfile
+# (no Apple ID / 2FA needed). See RELEASING.md for the env vars.

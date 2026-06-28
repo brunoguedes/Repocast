@@ -1,0 +1,45 @@
+<!-- @dsCard group="Components" viewport="700x340" name="Lists — Grouped rows" subtitle="ListRow + SectionHeader inside a grouped Card" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg-secondary); color: var(--text-primary); }
+  #root { padding: 22px 24px; max-width: 460px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { Card, ListRow, SectionHeader, Toggle, Badge } = window.RepocastDesignSystem_a3bb12;
+  function Demo() {
+    const [on, setOn] = React.useState(true);
+    return (
+      <div>
+        <SectionHeader>Settings</SectionHeader>
+        <Card variant="grouped">
+          <ListRow icon="mic" iconBg="var(--purple)" title="Voice" value="System Default" accessory="disclosure" onClick={()=>{}} />
+          <ListRow icon="gauge" iconBg="var(--blue)" title="Speech Rate" value="Default" accessory="disclosure" onClick={()=>{}} />
+          <ListRow icon="sparkles" iconBg="var(--green)" title="Apple Intelligence" trailing={<Toggle checked={on} onChange={setOn} />} last />
+        </Card>
+        <div style={{height:18}} />
+        <SectionHeader>Tracks</SectionHeader>
+        <Card variant="grouped">
+          <ListRow icon="audio-lines" title="README.md" subtitle="12:48" trailing={<Badge tint="green">Ready</Badge>} onClick={()=>{}} />
+          <ListRow icon="hourglass" iconColor="var(--orange)" title="DataStack.swift" subtitle="Generating…" onClick={()=>{}} />
+          <ListRow title="Delete All" destructive last onClick={()=>{}} />
+        </Card>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<Demo />);
+  setTimeout(() => window.lucide && window.lucide.createIcons(), 60);
+</script>
+</body>
+</html>

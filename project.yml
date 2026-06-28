@@ -1,0 +1,109 @@
+name: Repocast
+
+options:
+  bundleIdPrefix: au.com.bclgapps
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  defaultConfig: Release
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: XKV3A3SLX9
+
+# Firebase Analytics is the only third-party SDK / network dependency. SPM
+# resolves the transitive GoogleAppMeasurement binary automatically.
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: "11.0.0"
+
+targets:
+  Repocast:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/Repocast
+        excludes:
+          - "**/.DS_Store"
+          - "**/*.md"
+    resources:
+      - path: Sources/Repocast/Resources
+    info:
+      path: Sources/Repocast/Info.plist
+      properties:
+        CFBundleDisplayName: Repocast
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.productivity
+        LSRequiresIPhoneOS: true
+        ITSAppUsesNonExemptEncryption: false
+        # Keep audio playing when the screen locks / the app backgrounds —
+        # required for car + exercise listening.
+        UIBackgroundModes:
+          - audio
+        UILaunchScreen:
+          {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        "UISupportedInterfaceOrientations~ipad":
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: au.com.bclgapps.Repocast
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: YES
+        SWIFT_EMIT_LOC_STRINGS: YES
+    dependencies:
+      - package: Firebase
+        product: FirebaseAnalytics
+    scheme:
+      testTargets:
+        - RepocastTests
+        - RepocastUITests
+      gatherCoverageData: true
+
+  RepocastTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/RepocastTests
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: Repocast
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        PRODUCT_BUNDLE_IDENTIFIER: au.com.bclgapps.RepocastTests
+
+  RepocastUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/RepocastUITests
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: Repocast
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        PRODUCT_BUNDLE_IDENTIFIER: au.com.bclgapps.RepocastUITests
+
+configs:
+  Debug: debug
+  Release: release

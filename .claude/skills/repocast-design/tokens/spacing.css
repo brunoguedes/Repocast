@@ -1,0 +1,33 @@
+/* Repocast — Spacing & radius tokens
+ *
+ * iOS lays out on an 8pt grid with 4pt half-steps. The canonical screen-edge
+ * inset is 16pt (20pt on grouped Form/list content). Corner radii use Apple's
+ * "continuous" (squircle) curvature — emulated on the web with generous radii.
+ */
+
+:root {
+  /* ---- Spacing (8pt grid, 4pt half-steps) ---- */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px; /* standard screen edge inset */
+  --space-6: 20px; /* grouped list edge inset */
+  --space-7: 24px;
+  --space-8: 32px;
+  --space-9: 44px; /* minimum hit target */
+  --space-10: 64px;
+
+  --inset-screen: 16px;
+  --inset-grouped: 20px;
+  --hit-target: 44px;
+
+  /* ---- Corner radii (continuous curvature) ---- */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px; /* grouped list cards */
+  --radius-lg: 14px; /* buttons, tiles */
+  --radius-xl: 20px; /* prominent cards */
+  --radius-sheet: 38px; /* modal sheet top corners (device-matched) */
+  --radius-capsule: 999px; /* pills, segmented control, capsule buttons */
+}

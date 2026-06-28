@@ -1,0 +1,115 @@
+default_platform(:ios)
+
+# ─── Helpers ────────────────────────────────────────────────────────────────
+
+PROJECT_ROOT  = File.expand_path("..", __dir__).freeze
+PROJECT_YML   = File.join(PROJECT_ROOT, "project.yml").freeze
+XCODEPROJ     = "Repocast.xcodeproj".freeze
+APP_SCHEME    = "Repocast".freeze
+
+# Read the current MARKETING_VERSION from project.yml.
+def current_marketing_version
+  File.read(PROJECT_YML).match(/^\s+MARKETING_VERSION:\s+"([^"]+)"/)[1]
+end
+
+# Read the current CURRENT_PROJECT_VERSION from project.yml.
+def current_build_number
+  File.read(PROJECT_YML).match(/^\s+CURRENT_PROJECT_VERSION:\s+"([^"]+)"/)[1]
+end
+
+# Replace MARKETING_VERSION and/or CURRENT_PROJECT_VERSION in project.yml,
+# preserving everything else. Only the first (app target) entry is rewritten.
+def write_versions(marketing: nil, build: nil)
+  text = File.read(PROJECT_YML)
+  text.sub!(/^(\s+MARKETING_VERSION:\s+)"[^"]+"/, "\\1\"#{marketing}\"") if marketing
+  text.sub!(/^(\s+CURRENT_PROJECT_VERSION:\s+)"[^"]+"/, "\\1\"#{build}\"") if build
+  File.write(PROJECT_YML, text)
+end
+
+# Regenerate Repocast.xcodeproj and the merged Info.plist from project.yml.
+def regenerate_project
+  Dir.chdir(PROJECT_ROOT) { sh("xcodegen generate") }
+end
+
+# Resolve an App Store Connect API key from environment variables. Returns the
+# hash that build_app / upload_to_testflight expect, or nil if not set.
+def resolve_asc_api_key
+  return nil unless ENV["ASC_KEY_ID"] && ENV["ASC_ISSUER_ID"]
+
+  app_store_connect_api_key(
+    key_id: ENV["ASC_KEY_ID"],
+    issuer_id: ENV["ASC_ISSUER_ID"],
+    key_filepath: ENV["ASC_KEY_FILEPATH"],
+    key_content: ENV["ASC_KEY_CONTENT"],
+    is_key_content_base64: ENV["ASC_KEY_CONTENT_BASE64"] == "true",
+    duration: 1200,
+    in_house: false
+  )
+end
+
+# ─── Lanes ──────────────────────────────────────────────────────────────────
+
+platform :ios do
+
+  desc "Run unit and UI tests on a simulator."
+  lane :tests do
+    run_tests(
+      project: XCODEPROJ,
+      scheme: APP_SCHEME,
+      devices: ["iPhone 16 Pro"],
+      clean: true
+    )
+  end
+
+  desc "Increment the build number (CURRENT_PROJECT_VERSION) by 1, then regenerate the project."
+  lane :bump_build do
+    current = current_build_number.to_i
+    new_build = current + 1
+    write_versions(build: new_build.to_s)
+    regenerate_project
+    UI.success("Build number bumped: #{current} -> #{new_build}")
+  end
+
+  desc "Set the marketing version explicitly and reset build to 1. Usage: fastlane set_version version:1.3"
+  lane :set_version do |options|
+    new_marketing = options[:version]
+    UI.user_error!("Pass version:X.Y[.Z] — e.g. fastlane set_version version:1.3") if new_marketing.to_s.empty?
+    old_marketing = current_marketing_version
+    write_versions(marketing: new_marketing, build: "1")
+    regenerate_project
+    UI.success("Version set: #{old_marketing} -> #{new_marketing} (build reset to 1)")
+  end
+
+  desc "Build a Release archive and upload it to TestFlight. Does not bump the version."
+  lane :beta do
+    api_key = resolve_asc_api_key
+    UI.user_error!("Set ASC_KEY_ID, ASC_ISSUER_ID, and ASC_KEY_FILEPATH. See RELEASING.md.") if api_key.nil?
+
+    build_app(
+      project: XCODEPROJ,
+      scheme: APP_SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      clean: true,
+      output_directory: "build",
+      output_name: "Repocast.ipa",
+      export_options: { signingStyle: "automatic" },
+      xcargs: "-allowProvisioningUpdates"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+    )
+
+    UI.success("Uploaded Repocast #{current_marketing_version} (#{current_build_number}) to TestFlight.")
+  end
+
+  desc "Convenience: bump_build -> beta. Builds the next TestFlight build of the current marketing version."
+  lane :release_build do
+    bump_build
+    beta
+  end
+
+end

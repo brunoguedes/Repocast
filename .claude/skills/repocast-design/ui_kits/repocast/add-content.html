@@ -1,0 +1,63 @@
+<!-- @dsCard group="Repocast App" viewport="390x844" name="Repos — Add Content" subtitle="Connect GitHub, add a repo, browse files, generate audio" -->
+<!-- @startingPoint section="Repocast App" subtitle="Repos / Add Content flow — connect, browse, generate" viewport="390x844" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Repocast — Repos</title>
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { font-family: var(--font-text); background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; }
+  .rc-phone { position: relative; width: 390px; height: 844px; overflow: hidden; background: var(--bg-grouped); display: flex; flex-direction: column; color: var(--text-primary); }
+  .rc-statusbar { height: 50px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 28px 0 32px; }
+  .rc-time { font: var(--type-subheadline); font-weight: 600; }
+  .rc-status-icons { display: flex; align-items: center; gap: 6px; }
+  .rc-screen { flex: 1; min-height: 0; position: relative; }
+
+  .rc-tap-row:active { background: var(--fill-quaternary) !important; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .rc-push { animation: rc-push-in var(--duration-base) var(--ease-standard); }
+  }
+  @keyframes rc-push-in { from { transform: translateX(28px); opacity: 0.4; } to { transform: translateX(0); opacity: 1; } }
+
+  .rc-spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--fill); border-top-color: var(--tint); animation: rc-spin 0.8s linear infinite; }
+  @keyframes rc-spin { to { transform: rotate(360deg); } }
+
+  .rc-scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.28); opacity: 0; pointer-events: none; transition: opacity var(--duration-base) var(--ease-out); z-index: 10; }
+  .rc-scrim.show { opacity: 1; pointer-events: auto; }
+  .rc-sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 92%; background: var(--bg-grouped); border-radius: var(--radius-sheet) var(--radius-sheet) 0 0; box-shadow: var(--shadow-sheet); overflow: hidden; z-index: 11; transform: translateY(102%); transition: transform var(--duration-base) var(--ease-standard); }
+  .rc-sheet.up { transform: translateY(0); }
+
+  .rc-toast { position: absolute; left: 50%; bottom: 40px; transform: translate(-50%, 20px); z-index: 20; display: flex; align-items: center; gap: 8px;
+    padding: 11px 18px; border-radius: var(--radius-capsule); background: var(--material-thick); backdrop-filter: var(--blur-thick); -webkit-backdrop-filter: var(--blur-thick);
+    box-shadow: var(--shadow-lg); font: var(--type-subheadline); color: var(--text-primary); opacity: 0; pointer-events: none; transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out); white-space: nowrap; }
+  .rc-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .rc-screen ::-webkit-scrollbar, .rc-sheet ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="rc-icon.js" data-presets="env,react"></script>
+<script type="text/babel" src="addcontent-data.js" data-presets="env,react"></script>
+<script type="text/babel" src="ConnectGitHubSheet.jsx" data-presets="env,react"></script>
+<script type="text/babel" src="AddRepoSheet.jsx" data-presets="env,react"></script>
+<script type="text/babel" src="RepoBrowser.jsx" data-presets="env,react"></script>
+<script type="text/babel" src="ReposFlow.jsx" data-presets="env,react"></script>
+<script type="text/babel" data-presets="env,react">
+  function mount() {
+    if (!window.ReposFlow || !window.RepocastDesignSystem_a3bb12 || !window.RC_TREE || !window.RCIcon) { setTimeout(mount, 40); return; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<window.ReposFlow />);
+  }
+  mount();
+</script>
+</body>
+</html>

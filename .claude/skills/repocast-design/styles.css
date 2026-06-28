@@ -1,0 +1,10 @@
+/* Repocast Design System — global stylesheet entry point.
+ * Consumers link THIS one file. It is a manifest of @imports only — no rules
+ * are declared here. Everything reachable from these imports ships to
+ * consumers: tokens (CSS custom properties) and any @font-face rules.
+ */
+
+@import "tokens/colors.css";
+@import "tokens/typography.css";
+@import "tokens/spacing.css";
+@import "tokens/elevation.css";

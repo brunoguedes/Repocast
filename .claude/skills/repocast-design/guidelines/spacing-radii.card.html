@@ -1,0 +1,25 @@
+<!-- @dsCard group="Spacing" viewport="700x150" name="Corner Radii" subtitle="Continuous (squircle) curvature, from cards to capsules" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg); color: var(--text-primary); }
+  .wrap { padding: 20px 24px; display: flex; gap: 16px; align-items: center; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .box { width: 72px; height: 72px; background: var(--bg-secondary); border: 1px solid var(--separator); }
+  .lbl { font: var(--type-caption-2); font-family: var(--font-mono); color: var(--text-secondary); }
+  .cap { background: var(--tint); border: none; color: #fff; display: flex; align-items: center; justify-content: center; font: var(--type-subheadline); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="col"><div class="box" style="border-radius:var(--radius-sm)"></div><span class="lbl">sm · 8</span></div>
+    <div class="col"><div class="box" style="border-radius:var(--radius-md)"></div><span class="lbl">md · 10</span></div>
+    <div class="col"><div class="box" style="border-radius:var(--radius-lg)"></div><span class="lbl">lg · 14</span></div>
+    <div class="col"><div class="box" style="border-radius:var(--radius-xl)"></div><span class="lbl">xl · 20</span></div>
+    <div class="col"><div class="box cap" style="width:120px;border-radius:var(--radius-capsule)">Capsule</div><span class="lbl">999</span></div>
+  </div>
+</body>
+</html>

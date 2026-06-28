@@ -1,0 +1,35 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Product Tint" subtitle="System blue — Repocast's accent, with pressed + on-tint" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg); color: var(--text-primary); }
+  .wrap { display: flex; gap: 14px; padding: 20px; align-items: stretch; }
+  .sw { flex: 1; border-radius: var(--radius-lg); padding: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 96px; }
+  .name { font: var(--type-footnote); font-weight: 600; }
+  .hex { font: var(--type-caption-1); font-family: var(--font-mono); opacity: 0.85; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="sw" style="background: var(--tint); color: var(--text-on-tint);">
+      <span class="name">--tint</span>
+      <span class="hex">#007AFF · systemBlue</span>
+    </div>
+    <div class="sw" style="background: var(--tint-pressed); color: #fff;">
+      <span class="name">--tint-pressed</span>
+      <span class="hex">#0062CC</span>
+    </div>
+    <div class="sw" style="background: var(--bg); color: var(--tint); border: 1px solid var(--separator);">
+      <span class="name">tint on surface</span>
+      <span class="hex">links · icons · active</span>
+    </div>
+    <div class="sw" style="background: var(--tint); color: var(--text-on-tint); align-items: flex-start;">
+      <span class="name">--text-on-tint</span>
+      <span class="hex">#FFFFFF</span>
+    </div>
+  </div>
+</body>
+</html>

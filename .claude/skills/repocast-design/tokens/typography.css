@@ -1,0 +1,45 @@
+/* Repocast — Typography tokens
+ *
+ * Repocast is a native iOS app: it renders in San Francisco (SF Pro Text /
+ * SF Pro Display) chosen automatically by the system at each optical size,
+ * with SF Mono for code. SF is an Apple system font and cannot be webfont-
+ * embedded — so the stacks below resolve it through the `-apple-system` /
+ * `BlinkMacSystemFont` / `ui-monospace` keywords (which ARE San Francisco on
+ * Apple platforms) rather than a quoted family name; elsewhere they fall back
+ * gracefully. No @font-face is needed or shipped — see readme.md → VISUAL
+ * FOUNDATIONS for the substitution note.
+ */
+
+:root {
+  --font-text: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI",
+    Roboto, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco,
+    monospace;
+
+  /* iOS Dynamic Type ramp (Large / default content size).
+   * size / line-height / weight — matches the system text styles the app uses. */
+  --type-large-title: 700 34px/41px var(--font-display);
+  --type-title-1: 700 28px/34px var(--font-display);
+  --type-title-2: 700 22px/28px var(--font-display);
+  --type-title-3: 600 20px/25px var(--font-display);
+  --type-headline: 600 17px/22px var(--font-text);
+  --type-body: 400 17px/22px var(--font-text);
+  --type-callout: 400 16px/21px var(--font-text);
+  --type-subheadline: 400 15px/20px var(--font-text);
+  --type-footnote: 400 13px/18px var(--font-text);
+  --type-caption-1: 400 12px/16px var(--font-text);
+  --type-caption-2: 400 11px/13px var(--font-text);
+
+  /* Letter-spacing — SF tracks slightly tight at display sizes. */
+  --tracking-tight: -0.4px;
+  --tracking-normal: -0.2px;
+  --tracking-loose: 0;
+
+  /* Weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+}

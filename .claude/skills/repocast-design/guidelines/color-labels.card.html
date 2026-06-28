@@ -1,0 +1,39 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Label & Fill Colors" subtitle="Text label hierarchy and translucent control fills" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin: 0; font-family: var(--font-text); background: var(--bg); color: var(--text-primary); }
+  .wrap { display: flex; gap: 28px; padding: 20px; }
+  .col { flex: 1; }
+  .h { font: var(--type-caption-1); font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px; }
+  .labels p { margin: 0 0 6px; font: var(--type-callout); }
+  .fills { display: flex; flex-direction: column; gap: 6px; }
+  .fill { height: 22px; border-radius: var(--radius-sm); display: flex; align-items: center; padding: 0 10px; font: var(--type-caption-2); color: var(--text-secondary); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="col">
+      <div class="h">Label</div>
+      <div class="labels">
+        <p style="color:var(--label)">Primary label</p>
+        <p style="color:var(--label-secondary)">Secondary label</p>
+        <p style="color:var(--label-tertiary)">Tertiary label</p>
+        <p style="color:var(--label-quaternary)">Quaternary label</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="h">Fill (on gray-6)</div>
+      <div class="fills" style="background:var(--bg-secondary); padding:10px; border-radius:var(--radius-md)">
+        <div class="fill" style="background:var(--fill)">systemFill</div>
+        <div class="fill" style="background:var(--fill-secondary)">secondary</div>
+        <div class="fill" style="background:var(--fill-tertiary)">tertiary</div>
+        <div class="fill" style="background:var(--fill-quaternary)">quaternary</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
