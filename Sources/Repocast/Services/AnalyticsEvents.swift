@@ -31,8 +31,8 @@ extension AnalyticsService {
         log("github_disconnected")
     }
 
-    static func logRepoAdded() {
-        log("repo_added")
+    static func logRepoAdded(public isPublic: Bool = false) {
+        log("repo_added", ["public": isPublic])
     }
 
     static func logTracksFromRepo(count: Int) {
@@ -51,5 +51,49 @@ extension AnalyticsService {
 
     static func logPlaylistPlayed(smart: Bool) {
         log("playlist_played", ["smart": smart])
+    }
+
+    static func logNarrationImported(parts: Int, stitched: Bool) {
+        log("narration_imported", ["parts": parts, "stitched": stitched])
+    }
+
+    static func logNarrationImportFailed() {
+        log("narration_import_failed")
+    }
+
+    static func logNarrationPlayed(resumed: Bool, stitched: Bool) {
+        log("narration_played", ["resumed": resumed, "stitched": stitched])
+    }
+
+    static func logNarrationFinished() {
+        log("narration_finished")
+    }
+
+    static func logNarrationDeleted() {
+        log("narration_deleted")
+    }
+
+    static func logCarPlayConnected() {
+        log("carplay_connected")
+    }
+
+    static func logNoteRecordingStarted(kind: String) {
+        log("note_recording_started", ["content_kind": kind])
+    }
+
+    static func logNoteRecorded(kind: String) {
+        log("note_recorded", ["content_kind": kind])
+    }
+
+    static func logNoteTranscribed(success: Bool) {
+        log("note_transcribed", ["success": success])
+    }
+
+    static func logNoteJumped(kind: String) {
+        log("note_jumped", ["content_kind": kind])
+    }
+
+    static func logNoteDeleted() {
+        log("note_deleted")
     }
 }

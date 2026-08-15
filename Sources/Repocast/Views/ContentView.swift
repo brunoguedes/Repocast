@@ -1,8 +1,14 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct ContentView: View {
-    @State private var player = AudioPlayerService()
+    @Environment(\.scenePhase) private var scenePhase
+    /// The shared app-lifetime player — the CarPlay scene drives the same
+    /// instance, so both screens stay in sync.
+    private let player = AudioPlayerService.shared
+    /// Same deal for the voice-note recorder: one session shared with CarPlay.
+    private let recorder = VoiceNoteRecorder.shared
     @State private var account = GitHubAccount()
     @State private var selectedTab = 0
     @State private var showNowPlaying = false
@@ -18,7 +24,10 @@ struct ContentView: View {
             Tab("Playlists", systemImage: "music.note.list", value: 2) {
                 PlaylistsView()
             }
-            Tab("Settings", systemImage: "gearshape", value: 3) {
+            Tab("Notes", systemImage: "mic", value: 3) {
+                NotesView()
+            }
+            Tab("Settings", systemImage: "gearshape", value: 4) {
                 SettingsView()
             }
         }
@@ -29,15 +38,22 @@ struct ContentView: View {
         .sheet(isPresented: $showNowPlaying) {
             NowPlayingView()
                 .environment(player)
+                .environment(recorder)
         }
         // Binding the selection and logging on appear + change is what makes the
         // Firebase Screens report fire reliably on every switch.
         .onAppear { logTabScreen(selectedTab) }
         .onChange(of: selectedTab) { _, tab in logTabScreen(tab) }
+        // Flush the resume position when the app leaves the foreground so a
+        // termination while backgrounded loses nothing.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background || phase == .inactive { player.saveProgressNow() }
+        }
         // Outermost so the env reaches the safeAreaInset content (the
         // mini-player), which attaches above any `.environment` applied to the
         // TabView itself.
         .environment(player)
+        .environment(recorder)
         .environment(account)
     }
 
@@ -46,6 +62,7 @@ struct ContentView: View {
         case 0: "Tracks"
         case 1: "Repos"
         case 2: "Playlists"
+        case 3: "Notes"
         default: "Settings"
         }
         AnalyticsService.logScreen(name)
@@ -56,29 +73,70 @@ struct TracksView: View {
     @Environment(\.modelContext) private var context
     @Environment(AudioPlayerService.self) private var player
     @Query(sort: \AudioTrack.createdAt, order: .reverse) private var tracks: [AudioTrack]
+    @Query(sort: \NarrationPackage.importedAt, order: .reverse) private var narrations: [NarrationPackage]
     @State private var showNewTrack = false
+    @State private var showImportNarration = false
+    @State private var importer = NarrationImporter()
 
     private let files = AudioFileStore()
+    private let narrationStore = NarrationPackageStore()
+    private let resumeStore = NarrationResumeStore()
+
+    /// Tracks grouped by their originating repo (freeform tracks trail last).
+    private var groups: [RepoTrackGroup] { tracks.groupedByRepo() }
+
+    private var importFailureMessage: String? {
+        if case let .failed(message) = importer.phase { message } else { nil }
+    }
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(tracks) { track in
-                    Button { play(from: track) } label: {
-                        TrackRow(track: track)
+                if !narrations.isEmpty || importer.phase == .importing {
+                    Section("Narrations") {
+                        ForEach(narrations) { package in
+                            NavigationLink {
+                                NarrationPackageDetailView(package: package)
+                            } label: {
+                                NarrationPackageRow(package: package)
+                            }
+                        }
+                        .onDelete(perform: deleteNarrations)
+                        if importer.phase == .importing {
+                            HStack(spacing: 12) {
+                                ProgressView()
+                                Text("Importing…").foregroundStyle(.secondary)
+                            }
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
-                .onDelete(perform: delete)
+                ForEach(groups) { group in
+                    Section(group.title) {
+                        ForEach(group.tracks) { track in
+                            Button { play(from: track) } label: {
+                                TrackRow(track: track)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .onDelete { delete(in: group, offsets: $0) }
+                    }
+                }
             }
             .navigationTitle("Tracks")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("New", systemImage: "plus") { showNewTrack = true }
+                    Menu {
+                        Button("New Track", systemImage: "waveform") { showNewTrack = true }
+                        Button("Import Narration Folder", systemImage: "folder.badge.plus") {
+                            showImportNarration = true
+                        }
+                    } label: {
+                        Label("Add", systemImage: "plus")
+                    }
                 }
             }
             .overlay {
-                if tracks.isEmpty {
+                if tracks.isEmpty && narrations.isEmpty {
                     ContentUnavailableView(
                         "No Tracks Yet",
                         systemImage: "waveform",
@@ -89,13 +147,31 @@ struct TracksView: View {
             .sheet(isPresented: $showNewTrack) {
                 NewTrackView()
             }
+            .fileImporter(isPresented: $showImportNarration, allowedContentTypes: [.folder]) { result in
+                if case let .success(url) = result {
+                    Task { await importer.importPackage(from: url, into: context) }
+                }
+            }
+            .alert(
+                "Couldn't Import Narration",
+                isPresented: Binding(
+                    get: { importFailureMessage != nil },
+                    set: { if !$0 { importer.dismissFailure() } }
+                )
+            ) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(importFailureMessage ?? "")
+            }
         }
     }
 
     private func play(from track: AudioTrack) {
         var startAt = 0
         var items: [PlayableItem] = []
-        for candidate in tracks where candidate.status == .ready && files.exists(candidate.audioFileName) {
+        // Queue follows the on-screen (grouped) order so playback continues the
+        // way the list reads.
+        for candidate in groups.flatMap(\.tracks) where candidate.status == .ready && files.exists(candidate.audioFileName) {
             if candidate.persistentModelID == track.persistentModelID {
                 startAt = items.count
             }
@@ -105,7 +181,8 @@ struct TracksView: View {
                     title: candidate.title,
                     url: files.url(for: candidate.audioFileName),
                     duration: candidate.durationSeconds,
-                    transcript: candidate.transcript
+                    transcript: candidate.transcript,
+                    noteAnchor: .init(kind: .track, contentID: candidate.audioFileName)
                 )
             )
         }
@@ -113,11 +190,22 @@ struct TracksView: View {
         player.play(items: items, startAt: startAt)
     }
 
-    private func delete(_ offsets: IndexSet) {
+    private func delete(in group: RepoTrackGroup, offsets: IndexSet) {
         for index in offsets {
-            files.delete(tracks[index].audioFileName)
-            context.delete(tracks[index])
+            let track = group.tracks[index]
+            files.delete(track.audioFileName)
+            context.delete(track)
             AnalyticsService.logTrackDeleted()
+        }
+    }
+
+    private func deleteNarrations(_ offsets: IndexSet) {
+        for index in offsets {
+            let package = narrations[index]
+            narrationStore.delete(package.identifier)
+            resumeStore.clear(for: package.identifier)
+            context.delete(package)
+            AnalyticsService.logNarrationDeleted()
         }
     }
 }
@@ -179,5 +267,8 @@ private extension View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: [AudioTrack.self, RepoSource.self, Playlist.self, PlaylistItem.self], inMemory: true)
+        .modelContainer(
+            for: [AudioTrack.self, RepoSource.self, Playlist.self, PlaylistItem.self, NarrationPackage.self, VoiceNote.self],
+            inMemory: true
+        )
 }

@@ -1,0 +1,11 @@
+#EXTM3U
+#PLAYLIST:Proposal v2
+#EXTINF:1,Proposal v2 - Part 1 of 3
+#EXT-TRANSCRIPT:proposal_v2_part1.txt
+proposal_v2_part1.mp3
+#EXTINF:1,Proposal v2 - Part 2 of 3
+#EXT-TRANSCRIPT:proposal_v2_part2.txt
+proposal_v2_part2.mp3
+#EXTINF:-1,Proposal v2 - Part 3 of 3
+#EXT-TRANSCRIPT:proposal_v2_part3.txt
+proposal_v2_part3.mp3

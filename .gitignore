@@ -35,3 +35,7 @@ Sources/**/*.md
 
 # Design-system source archive (extracted into .claude/skills/repocast-design/)
 Repocast Design System.zip
+
+# Local agent-tool caches (serena MCP project data, token-usage scratch).
+.serena/
+.tokensave/
