@@ -12,7 +12,7 @@ import SwiftData
 /// relationships, no `@Attribute(.unique)`).
 enum DataStack {
     static let container: ModelContainer = {
-        let schema = Schema([AudioTrack.self, RepoSource.self, Playlist.self, PlaylistItem.self])
+        let schema = Schema([AudioTrack.self, RepoSource.self, Playlist.self, PlaylistItem.self, NarrationPackage.self, VoiceNote.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
             return try ModelContainer(for: schema, configurations: [config])

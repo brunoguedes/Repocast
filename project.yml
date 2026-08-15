@@ -50,6 +50,19 @@ targets:
         # required for car + exercise listening.
         UIBackgroundModes:
           - audio
+        # Voice notes: recorded with the mic, transcribed on-device.
+        NSMicrophoneUsageDescription: Repocast uses the microphone to record your voice notes.
+        NSSpeechRecognitionUsageDescription: Voice notes are transcribed to text on this device — the audio never leaves your iPhone.
+        # CarPlay attaches as a second scene while the phone UI runs, so
+        # multiple scenes must be on (side effect: iPad gains multi-window).
+        # Only the CarPlay role is configured — SwiftUI keeps handling the
+        # main window scene via its default configuration.
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: true
+          UISceneConfigurations:
+            CPTemplateApplicationSceneSessionRoleApplication:
+              - UISceneConfigurationName: CarPlay
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).CarPlaySceneDelegate
         UILaunchScreen:
           {}
         UISupportedInterfaceOrientations:
@@ -63,6 +76,18 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: au.com.bclgapps.Repocast
         CODE_SIGN_STYLE: Automatic
+        # CarPlay Audio, SIMULATOR ONLY for now. The entitlement is granted by
+        # Apple on request (https://developer.apple.com/contact/carplay/), and
+        # until they approve it for this bundle ID, automatic signing cannot
+        # create a device profile that includes it — so device/TestFlight
+        # builds sign with no entitlements file and simply omit CarPlay, while
+        # simulator builds (never profile-validated) keep it so the CarPlay
+        # display works (Simulator ▸ I/O ▸ External Displays ▸ CarPlay).
+        # Once Apple approves: add the capability to the App ID, delete the
+        # sdk=iphonesimulator scoping below, and set CODE_SIGN_ENTITLEMENTS
+        # unconditionally. The .entitlements file is checked in (hand-edited,
+        # not XcodeGen-generated).
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": Sources/Repocast/Repocast.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_PREVIEWS: YES
@@ -83,6 +108,11 @@ targets:
       - path: Tests/RepocastTests
         excludes:
           - "**/.DS_Store"
+      # Narration-package fixtures: a folder reference copied verbatim into the
+      # test bundle so per-package subfolders survive intact.
+      - path: Tests/Fixtures
+        type: folder
+        buildPhase: resources
     dependencies:
       - target: Repocast
     settings:

@@ -31,14 +31,16 @@ final class TrackGenerator {
         self.files = files
     }
 
-    /// Generate one track. `sourcePath` / `sourceKind` record where the text
-    /// came from (a repo file vs. pasted freeform text). Returns `true` on
-    /// success so batch callers (e.g. the repo file browser) can count results.
+    /// Generate one track. `repoFullName` / `sourcePath` / `sourceKind` record
+    /// where the text came from (a repo file vs. pasted freeform text). Returns
+    /// `true` on success so batch callers (e.g. the repo file browser) can count
+    /// results.
     @discardableResult
     func generate(
         title: String,
         text: String,
         kind: AudioTrack.GenerationKind,
+        repoFullName: String? = nil,
         sourcePath: String = "",
         sourceKind: AudioTrack.SourceKind = .freeform,
         voiceIdentifier: String?,
@@ -82,6 +84,7 @@ final class TrackGenerator {
 
             let track = AudioTrack(
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Untitled" : title,
+                repoFullName: repoFullName,
                 sourcePath: sourcePath,
                 sourceKind: sourceKind,
                 generationKind: usedKind,

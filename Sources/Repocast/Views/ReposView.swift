@@ -11,27 +11,24 @@ struct ReposView: View {
 
     @State private var showConnect = false
     @State private var showAddRepo = false
+    @State private var showAddPublicRepo = false
 
     var body: some View {
         NavigationStack {
             Group {
-                if !account.isConnected {
-                    ContentUnavailableView {
-                        Label("Connect GitHub", systemImage: "folder.badge.plus")
-                    } description: {
-                        Text("Add a GitHub token to browse your repositories and turn files into audio.")
-                    } actions: {
-                        Button("Connect GitHub") { showConnect = true }
-                            .buttonStyle(.borderedProminent)
-                    }
-                } else if repos.isEmpty {
+                if repos.isEmpty {
                     ContentUnavailableView {
                         Label("No Repositories", systemImage: "folder")
                     } description: {
-                        Text("Add a repository to start selecting files.")
+                        Text("Add any public repo by URL, or connect GitHub to browse your own.")
                     } actions: {
-                        Button("Add Repository") { showAddRepo = true }
+                        Button("Add Public Repo") { showAddPublicRepo = true }
                             .buttonStyle(.borderedProminent)
+                        if account.isConnected {
+                            Button("From Your Repos") { showAddRepo = true }
+                        } else {
+                            Button("Connect GitHub") { showConnect = true }
+                        }
                     }
                 } else {
                     List {
@@ -56,14 +53,20 @@ struct ReposView: View {
             }
             .navigationTitle("Repos")
             .toolbar {
-                if account.isConnected {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button("Add", systemImage: "plus") { showAddRepo = true }
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        Button("Add Public Repo", systemImage: "globe") { showAddPublicRepo = true }
+                        if account.isConnected {
+                            Button("From Your Repos", systemImage: "person.crop.circle") { showAddRepo = true }
+                        }
+                    } label: {
+                        Label("Add", systemImage: "plus")
                     }
                 }
             }
             .sheet(isPresented: $showConnect) { ConnectGitHubView() }
             .sheet(isPresented: $showAddRepo) { AddRepoView() }
+            .sheet(isPresented: $showAddPublicRepo) { AddPublicRepoView() }
         }
     }
 
@@ -213,8 +216,119 @@ struct AddRepoView: View {
                 repoDescription: repo.description
             )
         )
-        AnalyticsService.logRepoAdded()
+        AnalyticsService.logRepoAdded(public: repo.isPrivate == false)
         dismiss()
+    }
+}
+
+/// Adds any public repository by pasting its URL or `owner/name` — no GitHub
+/// connection required, since public repos are readable unauthenticated (a saved
+/// token, if present, just raises the rate limit). The reference is resolved
+/// against GitHub before it's saved, which also confirms the repo exists and is
+/// public.
+struct AddPublicRepoView: View {
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var input = ""
+    @State private var adding = false
+    @State private var error: String?
+
+    private let client = GitHubClient()
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("owner/repo or GitHub URL", text: $input)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
+                        .submitLabel(.go)
+                        .onSubmit { Task { await add() } }
+                } header: {
+                    Text("Public Repository")
+                } footer: {
+                    Text("Paste a link like github.com/apple/swift, or type owner/repo. Only public repositories can be added without connecting GitHub.")
+                }
+                if let error {
+                    Section {
+                        Label(error, systemImage: "exclamationmark.triangle")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                }
+            }
+            .navigationTitle("Add Public Repo")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") { Task { await add() } }
+                        .disabled(RepoReference(input) == nil || adding)
+                }
+            }
+            .overlay {
+                if adding {
+                    ProgressView("Finding repository…")
+                        .padding(24)
+                        .background(.regularMaterial, in: .rect(cornerRadius: 16))
+                }
+            }
+            .interactiveDismissDisabled(adding)
+        }
+    }
+
+    private func add() async {
+        guard let reference = RepoReference(input) else { return }
+        adding = true
+        error = nil
+        do {
+            let repo = try await client.repository(owner: reference.owner, repo: reference.name)
+            context.insert(
+                RepoSource(
+                    owner: repo.owner.login,
+                    name: repo.name,
+                    defaultBranch: repo.defaultBranch,
+                    repoDescription: repo.description
+                )
+            )
+            AnalyticsService.logRepoAdded(public: true)
+            dismiss()
+        } catch {
+            self.error = error.localizedDescription
+        }
+        adding = false
+    }
+}
+
+/// Parses a user-typed repo reference — a full GitHub URL (with or without a
+/// scheme, trailing path, or `.git` suffix) or a bare `owner/name` — into its
+/// owner and repo name. Returns nil when it can't find both halves.
+struct RepoReference: Equatable {
+    let owner: String
+    let name: String
+
+    init?(_ raw: String) {
+        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return nil }
+        // Drop everything up to and including the host so a pasted URL and a
+        // bare "owner/name" reduce to the same "owner/name/…" path form.
+        if let host = text.range(of: "github.com") {
+            text = String(text[host.upperBound...])
+        }
+        let parts = text
+            .split(separator: "/", omittingEmptySubsequences: true)
+            .map(String.init)
+        guard parts.count >= 2 else { return nil }
+        let owner = parts[0]
+        var name = parts[1]
+        if name.hasSuffix(".git") { name = String(name.dropLast(4)) }
+        guard !owner.isEmpty, !name.isEmpty else { return nil }
+        self.owner = owner
+        self.name = name
     }
 }
 
@@ -352,6 +466,7 @@ struct RepoBrowserView: View {
                     title: lastComponent(filePath),
                     text: text,
                     kind: kind,
+                    repoFullName: repo.fullName,
                     sourcePath: filePath,
                     sourceKind: detected,
                     voiceIdentifier: voiceIdentifier.isEmpty ? nil : voiceIdentifier,

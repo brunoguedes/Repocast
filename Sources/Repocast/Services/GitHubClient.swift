@@ -8,6 +8,9 @@ protocol GitHubFetching: Sendable {
     func validate(token: String) async throws -> GitHubUser
     /// Repositories the saved token can see (first page, most-recently updated).
     func repositories() async throws -> [GitHubRepo]
+    /// Metadata for a single repo. Works unauthenticated for public repos; uses
+    /// the saved token (if any) for higher rate limits and private access.
+    func repository(owner: String, repo: String) async throws -> GitHubRepo
     /// Directory listing at `path` ("" = repo root).
     func contents(owner: String, repo: String, path: String, ref: String?) async throws -> [GitHubContentEntry]
     /// UTF-8 text of a single file.
@@ -52,25 +55,35 @@ struct GitHubClient: GitHubFetching {
         try await get("/user/repos?per_page=100&sort=updated", token: requireToken())
     }
 
+    func repository(owner: String, repo: String) async throws -> GitHubRepo {
+        try await get("/repos/\(owner)/\(repo)", token: savedToken())
+    }
+
     func contents(owner: String, repo: String, path: String, ref: String?) async throws -> [GitHubContentEntry] {
-        try await get(contentsEndpoint(owner: owner, repo: repo, path: path, ref: ref), token: requireToken())
+        try await get(contentsEndpoint(owner: owner, repo: repo, path: path, ref: ref), token: savedToken())
     }
 
     func fileText(owner: String, repo: String, path: String, ref: String?) async throws -> String {
         let file: GitHubFileContent = try await get(
             contentsEndpoint(owner: owner, repo: repo, path: path, ref: ref),
-            token: requireToken()
+            token: savedToken()
         )
         return file.decodedText() ?? ""
     }
 
     // MARK: Internals
 
+    /// The saved token, required — for endpoints that only make sense
+    /// authenticated (e.g. listing *your* repos).
     private func requireToken() throws -> String {
-        guard let token = keychain.read(account: KeychainStore.tokenAccount) else {
-            throw GitHubError.notAuthenticated
-        }
+        guard let token = savedToken() else { throw GitHubError.notAuthenticated }
         return token
+    }
+
+    /// The saved token if there is one. Reads of public repos work without it;
+    /// when present it raises the rate limit and unlocks private repos.
+    private func savedToken() -> String? {
+        keychain.read(account: KeychainStore.tokenAccount)
     }
 
     private func contentsEndpoint(owner: String, repo: String, path: String, ref: String?) -> String {
@@ -85,11 +98,11 @@ struct GitHubClient: GitHubFetching {
         return endpoint
     }
 
-    private func get<T: Decodable>(_ endpoint: String, token: String) async throws -> T {
+    private func get<T: Decodable>(_ endpoint: String, token: String?) async throws -> T {
         guard let url = URL(string: endpoint, relativeTo: base) else { throw GitHubError.badURL }
 
         var request = URLRequest(url: url)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if let token { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
         request.setValue("Repocast", forHTTPHeaderField: "User-Agent")
