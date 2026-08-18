@@ -76,18 +76,14 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: au.com.bclgapps.Repocast
         CODE_SIGN_STYLE: Automatic
-        # CarPlay Audio, SIMULATOR ONLY for now. The entitlement is granted by
-        # Apple on request (https://developer.apple.com/contact/carplay/), and
-        # until they approve it for this bundle ID, automatic signing cannot
-        # create a device profile that includes it — so device/TestFlight
-        # builds sign with no entitlements file and simply omit CarPlay, while
-        # simulator builds (never profile-validated) keep it so the CarPlay
-        # display works (Simulator ▸ I/O ▸ External Displays ▸ CarPlay).
-        # Once Apple approves: add the capability to the App ID, delete the
-        # sdk=iphonesimulator scoping below, and set CODE_SIGN_ENTITLEMENTS
-        # unconditionally. The .entitlements file is checked in (hand-edited,
-        # not XcodeGen-generated).
-        "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": Sources/Repocast/Repocast.entitlements
+        # CarPlay Audio. Apple granted the entitlement for this account
+        # (2026-08-18), so it now applies to every build. If device signing
+        # complains that the profile lacks the capability, enable "CarPlay
+        # Audio App" on the au.com.bclgapps.Repocast identifier under
+        # developer.apple.com ▸ Identifiers ▸ Additional Capabilities, then
+        # rebuild. The .entitlements file is checked in (hand-edited, not
+        # XcodeGen-generated).
+        CODE_SIGN_ENTITLEMENTS: Sources/Repocast/Repocast.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_PREVIEWS: YES
