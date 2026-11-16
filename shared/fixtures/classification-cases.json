@@ -1,0 +1,103 @@
+[
+  {
+    "name": "swift app with a manifest one folder down",
+    "paths": [
+      "README.md",
+      "docs/ARCHITECTURE.md",
+      "ios/project.yml",
+      "ios/Sources/App/RepocastApp.swift",
+      "ios/Sources/App/Views/ContentView.swift",
+      "ios/Sources/App/Models/Track.swift"
+    ],
+    "classification": "codebase",
+    "manifests": ["ios/project.yml"],
+    "entryPoints": ["ios/Sources/App/RepocastApp.swift"]
+  },
+  {
+    "name": "documents only",
+    "paths": [
+      "README.md",
+      "LICENSE",
+      "assets/cover.png",
+      "chapters/01-intro.md",
+      "chapters/02-setup.md",
+      "notes/meeting.txt"
+    ],
+    "classification": "documents",
+    "manifests": [],
+    "entryPoints": []
+  },
+  {
+    "name": "docs site beside a little code",
+    "paths": [
+      "package.json",
+      "src/index.ts",
+      "src/lib.ts",
+      "docs/a.md",
+      "docs/b.md",
+      "docs/c.md",
+      "docs/d.md",
+      "docs/e.md",
+      "docs/f.md",
+      "docs/g.md"
+    ],
+    "classification": "mixed",
+    "manifests": ["package.json"],
+    "entryPoints": ["src/index.ts"]
+  },
+  {
+    "name": "scripts without a manifest",
+    "paths": [
+      "README.md",
+      "scripts/build.sh",
+      "scripts/deploy.sh",
+      "tools/report.py"
+    ],
+    "classification": "mixed",
+    "manifests": [],
+    "entryPoints": []
+  },
+  {
+    "name": "vendored code is ignored",
+    "paths": [
+      "README.md",
+      "guide.md",
+      "node_modules/foo/package.json",
+      "node_modules/foo/index.js",
+      "vendor/lib/x.go"
+    ],
+    "classification": "documents",
+    "manifests": [],
+    "entryPoints": []
+  },
+  {
+    "name": "manifest deeper than the limit doesn't count",
+    "paths": [
+      "README.md",
+      "a/b/c/package.json",
+      "a/b/c/index.js",
+      "a/b/c/util.js"
+    ],
+    "classification": "mixed",
+    "manifests": [],
+    "entryPoints": ["a/b/c/index.js"]
+  },
+  {
+    "name": "glob manifest",
+    "paths": [
+      "src/App/App.csproj",
+      "src/App/Program.cs",
+      "src/App/Startup.cs"
+    ],
+    "classification": "codebase",
+    "manifests": ["src/App/App.csproj"],
+    "entryPoints": ["src/App/Program.cs"]
+  },
+  {
+    "name": "empty repo",
+    "paths": [],
+    "classification": "mixed",
+    "manifests": [],
+    "entryPoints": []
+  }
+]

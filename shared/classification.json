@@ -1,0 +1,30 @@
+{
+  "_comment": "Repo classification rule shared by ios/ (RepoClassifier) and backend/ (classify.ts). A repo is a codebase when it has a dependency manifest and code makes up at least codebaseMinCodeRatio of its code+doc files; documents when it has no manifest and docs make up at least documentsMinDocRatio; otherwise mixed. Files under ignoredDirectories are skipped; files with neither a code nor a doc extension don't count. Manifests count only within manifestMaxDepth folders of the root. Change this file, then fixtures/classification-cases.json, and run both test suites.",
+  "codebaseMinCodeRatio": 0.3,
+  "documentsMinDocRatio": 0.7,
+  "manifestMaxDepth": 2,
+  "manifests": [
+    "Package.swift", "project.yml", "Podfile", "Cartfile",
+    "package.json", "deno.json",
+    "pyproject.toml", "setup.py", "requirements.txt", "Pipfile",
+    "go.mod", "Cargo.toml",
+    "pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts",
+    "Gemfile", "composer.json", "mix.exs", "pubspec.yaml",
+    "CMakeLists.txt", "Makefile", "*.csproj", "*.sln"
+  ],
+  "codeExtensions": [
+    "swift", "m", "mm", "h", "c", "cc", "cpp", "hpp",
+    "kt", "kts", "java", "scala", "groovy",
+    "js", "jsx", "mjs", "cjs", "ts", "tsx", "vue", "svelte",
+    "py", "rb", "go", "rs", "cs", "fs", "php", "dart",
+    "ex", "exs", "erl", "clj", "hs", "lua", "r", "jl", "zig",
+    "sh", "bash", "zsh", "sql"
+  ],
+  "docExtensions": ["md", "markdown", "mdx", "txt", "rst", "adoc", "org", "pdf", "tex"],
+  "ignoredDirectories": [
+    ".git", ".github", "node_modules", "vendor", "Pods", "Carthage", "build", "dist", "out",
+    "target", ".build", "DerivedData", "__pycache__", ".venv", "venv", "third_party", ".sst"
+  ],
+  "entryPointStems": ["main", "index", "app", "server", "cli", "__main__", "program", "application", "router", "routes"],
+  "entryPointSuffixes": ["App.swift", "Application.kt", "Application.java", "AppDelegate.swift"]
+}

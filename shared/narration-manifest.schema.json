@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://repocast.app/schemas/narration-manifest/1.json",
+  "title": "Repocast narration manifest",
+  "description": "manifest.json beside <base>.m3u8 in a narration package. Optional: packages without one still import. Readers ignore unknown properties.",
+  "type": "object",
+  "required": ["schemaVersion", "repo", "commit", "episodeType", "executor", "generatedAt", "parts"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "repo": {
+      "description": "owner/name on GitHub.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$"
+    },
+    "commit": {
+      "description": "Full SHA of the commit the episode was built from.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "episodeType": { "enum": ["intro", "architecture"] },
+    "module": {
+      "description": "Module path the episode covers. Null until module episodes exist.",
+      "type": ["string", "null"]
+    },
+    "executor": { "enum": ["cloud", "device"] },
+    "voice": {
+      "description": "Display name of the voice, for the UI only.",
+      "type": ["string", "null"]
+    },
+    "quotaMinutes": {
+      "description": "Generation minutes charged against the user's monthly quota. 0 for on-device episodes.",
+      "type": "number",
+      "minimum": 0
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "parts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["file", "title", "transcript"],
+        "properties": {
+          "file": { "type": "string" },
+          "title": { "type": "string" },
+          "transcript": { "type": "string" },
+          "durationSeconds": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}
