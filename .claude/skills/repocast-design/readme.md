@@ -10,14 +10,14 @@ This system was reverse-engineered from the Repocast iOS codebase (read-only, mo
 
 - **Codebase:** `Repocast/` — Swift 6 / SwiftUI app. Bundle ID `au.com.bclgapps.Repocast`, © 2026 BCLGApps.
 - Key files read:
-  - `Sources/Repocast/Views/ContentView.swift` — `TabView` (Tracks / Settings) + persistent mini-player via `.safeAreaInset(edge: .bottom)`.
-  - `Sources/Repocast/Views/PlayerViews.swift` — `MiniPlayerBar` (`.regularMaterial`) and `NowPlayingView` (scrubber, transport, segmented speed picker).
-  - `Sources/Repocast/Views/NewTrackView.swift` — sheet `Form` (title field, multi-line text editor, generate).
-  - `Sources/Repocast/Views/SettingsView.swift` — grouped `Form` with voice picker, speech-rate slider.
-  - `Sources/Repocast/Resources/Assets.xcassets/AccentColor.colorset` — accent = `sRGB(0, 0.478, 1.0)` = **`#007AFF`** (system blue).
-  - `Sources/Repocast/Models/AudioTrack.swift` — domain model (track status: pending / generating / ready / failed; source kind: code / markdown / changes / freeform).
-  - `appstore/APPSTORE.md`, `appstore/repocast-support.md` — product copy & tone.
-  - `CLAUDE.md`, `README.md` — architecture, the "audio pipeline" spine, roadmap.
+  - `ios/Sources/Repocast/Views/ContentView.swift` — `TabView` (Tracks / Settings) + persistent mini-player via `.safeAreaInset(edge: .bottom)`.
+  - `ios/Sources/Repocast/Views/PlayerViews.swift` — `MiniPlayerBar` (`.regularMaterial`) and `NowPlayingView` (scrubber, transport, segmented speed picker).
+  - `ios/Sources/Repocast/Views/NewTrackView.swift` — sheet `Form` (title field, multi-line text editor, generate).
+  - `ios/Sources/Repocast/Views/SettingsView.swift` — grouped `Form` with voice picker, speech-rate slider.
+  - `ios/Sources/Repocast/Resources/Assets.xcassets/AccentColor.colorset` — accent = `sRGB(0, 0.478, 1.0)` = **`#007AFF`** (system blue).
+  - `ios/Sources/Repocast/Models/AudioTrack.swift` — domain model (track status: pending / generating / ready / failed; source kind: code / markdown / changes / freeform).
+  - `ios/appstore/APPSTORE.md`, `ios/appstore/repocast-support.md` — product copy & tone.
+  - `CLAUDE.md`, `ios/CLAUDE.md`, `README.md` — architecture, the "audio pipeline" spine, roadmap.
 
 There is **no design asset folder, logo file, or Figma** in the repo — the app icon is generated at build time (a 1024×1024 placeholder slot only). See CAVEATS at the bottom.
 

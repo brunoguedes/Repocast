@@ -1,0 +1,19 @@
+# fastlane — keep Fastfile/Appfile/.env.example, ignore generated artefacts.
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/README.md
+fastlane/.env*
+!fastlane/.env.example
+
+# snapshot intermediates — the lane copies the keepers into appstore/screenshots-*/
+fastlane/screenshots/
+
+# Bundler-installed gems.
+vendor/bundle/
+
+# swift-project-assistant generated summaries (<name>.md siblings of sources).
+Sources/**/*.md
+
+# Backend endpoints for cloud generation — per-developer, see Config/Backend.xcconfig.example.
+Config/Backend.xcconfig

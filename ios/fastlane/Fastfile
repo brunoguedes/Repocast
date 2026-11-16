@@ -53,7 +53,8 @@ end
 # rewritten or dropped.
 def draft_release_notes
   range = last_build_ref ? "#{last_build_ref}..HEAD" : "HEAD"
-  subjects = sh("git", "log", "--no-merges", "--format=%s", range, log: false).split("\n")
+  # Scoped to the app folder so backend commits stay out of TestFlight notes.
+  subjects = sh("git", "log", "--no-merges", "--format=%s", range, "--", PROJECT_ROOT, log: false).split("\n")
   conventional = /\A\w+(\([^)]*\))?!?:\s*/
   pick = ->(type) { subjects.grep(/\A#{type}(\([^)]*\))?!?:\s*/).map { |s| s.sub(conventional, "") } }
   sections = {
@@ -378,7 +379,10 @@ platform :ios do
   desc "One shot: bump the build, upload it with its notes, then commit, tag and push."
   desc "Notes come from fastlane/release-notes/<version>-<next build>.txt; if it's missing a draft is generated from commits."
   lane :release_build do
-    ensure_git_status_clean
+    # Only the app folder has to be clean — work in progress under backend/
+    # doesn't block a build.
+    dirty = sh("git", "status", "--porcelain", "--", PROJECT_ROOT, log: false).strip
+    UI.user_error!("Uncommitted changes under #{PROJECT_ROOT}:\n#{dirty}") unless dirty.empty?
     bump_build
     notes = release_notes_path
     release_notes unless File.exist?(notes)

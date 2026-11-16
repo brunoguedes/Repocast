@@ -9,7 +9,7 @@ Swift files that implement Phase 4 from your `CLAUDE.md` roadmap — `Playlist` 
 > Mounted folder is read-only to the assistant, so these live here for you to
 > copy in. Paths below are relative to the repo root.
 
-## Files (copy into `Sources/Repocast/…`)
+## Files (copy into `ios/Sources/Repocast/…`)
 - `Models/Playlist.swift`
 - `Models/PlaylistItem.swift`
 - `Services/PlaylistGenerator.swift`

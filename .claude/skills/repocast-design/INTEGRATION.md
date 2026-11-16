@@ -16,7 +16,7 @@ The generated icon is the modern single-size universal format Xcode 16 / iOS 26 
 
 **Option B — replace the folder on disk:**
 1. Copy `export/AppIcon.appiconset/Icon-1024.png` + `Contents.json` into
-   `Sources/Repocast/Resources/Assets.xcassets/AppIcon.appiconset/`
+   `ios/Sources/Repocast/Resources/Assets.xcassets/AppIcon.appiconset/`
    (overwrite the existing `Contents.json`).
 2. `xcodegen generate` is **not** needed — asset-catalog contents aren't in `project.yml`.
 3. Clean build folder (⇧⌘K) if the old empty icon is cached, then build.
@@ -30,7 +30,7 @@ The generated icon is the modern single-size universal format Xcode 16 / iOS 26 
 The design system is **HTML/React + CSS tokens** — it's your source of truth for *how Repocast should look*, not Swift code you drop in. Use it to:
 
 - **Prototype new screens** (Phase 2–5: repo file-tree picker, playlists, spoken changelog) as click-through HTML before writing SwiftUI — faster to iterate, easy to share.
-- **Produce assets**: App Store screenshots, marketing pages, the support/privacy pages referenced in `appstore/`.
+- **Produce assets**: App Store screenshots, marketing pages, the support/privacy pages referenced in `ios/appstore/`.
 - **Stay consistent**: the `readme.md` codifies the content voice, color/type/spacing foundations, and iconography rules.
 
 ### As a Claude Skill (recommended)

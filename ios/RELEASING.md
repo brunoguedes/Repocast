@@ -47,7 +47,7 @@ Open `Repocast.xcodeproj` in Xcode and make sure the **Repocast** target signs c
 
 ## Day-to-day commands
 
-All commands run from the repo root.
+All commands run from `ios/` (the app folder), not the repo root.
 
 ### Run tests
 

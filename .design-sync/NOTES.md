@@ -51,7 +51,7 @@ newer one.
 
 ## App-side follow-ups (from the bundle's INTEGRATION.md)
 - App icon: `export/AppIcon.appiconset/Icon-1024.png` → drop into
-  `Sources/Repocast/Resources/Assets.xcassets/AppIcon.appiconset/` (scaffold's
+  `ios/Sources/Repocast/Resources/Assets.xcassets/AppIcon.appiconset/` (scaffold's
   AppIcon is currently empty). No `xcodegen` needed for asset-catalog content.
 - Optional token bridge: mirror tokens in a `Theme.swift` (`--tint` = `#007AFF`,
   radii, type → SwiftUI text styles).
