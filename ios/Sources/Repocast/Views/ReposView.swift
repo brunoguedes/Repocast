@@ -6,6 +6,7 @@ import AVFoundation
 /// selection into audio tracks.
 struct ReposView: View {
     @Environment(GitHubAccount.self) private var account
+    @Environment(TourService.self) private var tours
     @Environment(\.modelContext) private var context
     @Query(sort: \RepoSource.addedAt, order: .reverse) private var repos: [RepoSource]
 
@@ -67,6 +68,13 @@ struct ReposView: View {
             .sheet(isPresented: $showConnect) { ConnectGitHubView() }
             .sheet(isPresented: $showAddRepo) { AddRepoView() }
             .sheet(isPresented: $showAddPublicRepo) { AddPublicRepoView() }
+            // Eager tour index for repos that don't have one yet (just added,
+            // or added before tours existed).
+            .task(id: repos.map(\.fullName)) {
+                for repo in repos where repo.lastIndexedCommit == nil {
+                    await tours.index(repo, context: context)
+                }
+            }
         }
     }
 
@@ -339,6 +347,7 @@ struct RepoBrowserView: View {
     let path: String
 
     @Environment(\.modelContext) private var context
+    @Environment(TourService.self) private var tours
 
     @State private var entries: [GitHubContentEntry] = []
     @State private var loading = true
@@ -367,6 +376,9 @@ struct RepoBrowserView: View {
                 )
             } else {
                 List {
+                    if path.isEmpty {
+                        TourSection(repo: repo)
+                    }
                     ForEach(sortedEntries) { entry in
                         if entry.isDirectory {
                             NavigationLink {
@@ -407,6 +419,13 @@ struct RepoBrowserView: View {
             }
         }
         .task { await load() }
+        .task {
+            if path.isEmpty { await tours.index(repo, context: context) }
+        }
+        // Pull to re-index the tour at the latest commit.
+        .refreshable {
+            if path.isEmpty { await tours.index(repo, context: context, force: true) }
+        }
     }
 
     private var sortedEntries: [GitHubContentEntry] {

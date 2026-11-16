@@ -342,6 +342,8 @@ Repocast uses Firebase Analytics, so the answers are **not** "Data Not Collected
 - In App Store Connect's tracking question, answer **No** — none of the collected data is used to track users across apps/websites owned by other companies (Firebase Analytics here is first-party product analytics only, no ad attribution, no IDFA).
 - TODO: before submitting, re-read Google's "Firebase data disclosure for Apple's App Store" page for the Analytics SDK version in use, and keep these answers consistent with MyHealthInsights, which declares the same two types.
 
+> **Cloud voice is TestFlight-only** (gated in `CloudAccount` on the StoreKit `AppTransaction` environment), so these answers stay correct for the App Store build. When cloud voice ships to the App Store, add at least **Contact Info ▸ Email Address** (App Functionality, linked to identity) and review **User Content ▸ Other User Content** for repository names, and rewrite the privacy page's summary.
+
 **Data NOT collected (everything else):**
 
 - **Repository contents and the GitHub token** — the app talks to `api.github.com` directly from the device, on the user's behalf, with the user's own optional token. That data goes to GitHub (a service the user has their own relationship with) to serve each request; it never reaches us or a partner of ours, so it is not "collected" in Apple's sense. The token is stored in the iOS Keychain; fetched files, their transcripts and the generated audio are stored only in the app's local storage.

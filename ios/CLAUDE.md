@@ -4,9 +4,9 @@ Guidance for the **iOS app** (`ios/`). Every command below runs from `ios/`. The
 
 ## Project
 
-Repocast turns selected files from a git repository (source code and Markdown) into audio you can play in the car or while exercising, using on-device Apple Intelligence to summarize code, convert docs to speech, generate AI playlists, and voice the latest GitHub changes like new merges and open PRs.
+Repocast turns a GitHub repository into audio you can play in the car or while exercising: a guided **repo tour** (intro + architecture episodes), per-file tracks (on-device Apple Intelligence summaries for code, Markdown read verbatim), imported narration packages, voice notes and AI playlists.
 
-Native iOS app (iPhone + iPad, iOS 26+, Swift 6, SwiftUI) using **SwiftData** for local persistence. The only third-party SDK is **Firebase Analytics** (added via SPM), which logs anonymous usage telemetry (screen views and custom events); the only other network traffic goes straight to **api.github.com** for connected repos. See the Analytics and privacy sections below.
+Native iOS app (iPhone + iPad, iOS 26+, Swift 6, SwiftUI) using **SwiftData** for local persistence. The only third-party SDK is **Firebase Analytics** (added via SPM), which logs anonymous usage telemetry (screen views and custom events); other network traffic goes straight to **api.github.com** for connected repos, plus — in TestFlight builds only, when a tester signs in — the cloud-voice backend in [../backend/](../backend/). See the Analytics and privacy sections below.
 
 ## Build, run, test
 
@@ -52,7 +52,7 @@ RepoSource ──select files──►  TrackGenerationCoordinator
                                  Playlist ──► AudioPlayerService (background + lock screen + CarPlay)
 ```
 
-**Models** ([Models/](Sources/Repocast/Models)) — `AudioTrack` is the only domain model so far (the playable unit; bytes live on disk via `AudioFileStore`, the model holds metadata + filename). Enum fields are stored as raw `String` with computed accessors — drift-safe and CloudKit-ready. `Playlist` / `PlaylistItem` arrive in Phase 4. Everything goes into the `Schema([...])` in [DataStack.swift](Sources/Repocast/Models/DataStack.swift).
+**Models** ([Models/](Sources/Repocast/Models)) — `AudioTrack` (the playable unit; bytes live on disk via `AudioFileStore`, the model holds metadata + filename), `Playlist` / `PlaylistItem`, `NarrationPackage`, `VoiceNote`, `RepoSource` (+ its tour index) and `TourEpisode`. Enum fields are stored as raw `String` with computed accessors — drift-safe and CloudKit-ready. Everything goes into the `Schema([...])` in [DataStack.swift](Sources/Repocast/Models/DataStack.swift).
 
 **Services** ([Services/](Sources/Repocast/Services)) — all protocol-backed so tests inject mocks:
 - [AudioFileStore](Sources/Repocast/Services/AudioFileStore.swift) — owns `Documents/Audio/`; filename is the on-disk contract.
@@ -62,15 +62,27 @@ RepoSource ──select files──►  TrackGenerationCoordinator
 
 **Views** ([Views/](Sources/Repocast/Views)) — `ContentView` is a `TabView` (Tracks / Settings) with a persistent **mini-player** in `.safeAreaInset(edge: .bottom)` and a full **Now Playing** sheet ([PlayerViews.swift](Sources/Repocast/Views/PlayerViews.swift)). ⚠️ The `.environment(player)` must be the **outermost** modifier on the TabView so the safeAreaInset content (mini-player) inherits it — applying it before `.safeAreaInset` crashes at launch with "No Observable object of type AudioPlayerService".
 
+### Repo tour
+
+The guided tour of a whole repo (see the ideation notes and the root [CLAUDE.md](../CLAUDE.md) for the shared contract). [TourService](Sources/Repocast/Services/TourService.swift) — app-lifetime, injected like `GitHubAccount` — does both halves:
+
+- **Index** (eager, on add / opening a repo / pull to refresh): HEAD commit + recursive tree + README + manifests via `GitHubClient` → [RepoClassifier](Sources/Repocast/Services/RepoClassifier.swift) (rule from the bundled `shared/classification.json`) → summary + titles from the on-device model (README fallback) → planned [TourEpisode](Sources/Repocast/Models/TourEpisode.swift)s with estimates. Documents-only repos get an intro only; the user can override the classification.
+- **Generate** (lazy, on tap): **on device** — [TourScriptWriter](Sources/Repocast/Services/TourScriptWriter.swift) (`@Generable` sections from the bundled `shared/prompts`, long material condensed in 6,000-char chunks) → `SpeechSynthesizing` per section → `<base>_partN.caf` + `.txt` + `.m3u8` + `manifest.json`; or **cloud** — [CloudTourClient](Sources/Repocast/Services/CloudTourClient.swift) polls the backend and downloads the `.mp3` package file by file through signed URLs. Both go through `NarrationImporter.importLocalPackage` with a stable `tour://owner/name/<kind>/<executor>` identity, so episodes are ordinary `NarrationPackage`s (Narrations list, CarPlay, resume) and sections are their chapters.
+- **Cloud voice** is a TestFlight-only beta: [CloudAccount](Sources/Repocast/Services/CloudAccount.swift) signs in with Apple through Cognito's hosted UI (PKCE via `webAuthenticationSession`, tokens in `KeychainStore.cloud`) and is hidden unless `Config/Backend.xcconfig` is filled in **and** the install is Debug/TestFlight (`AppTransaction.environment`).
+- UI: [TourViews.swift](Sources/Repocast/Views/TourViews.swift) — the Tour section at the top of a repo's root browser, the sign-in sheet, and Settings ▸ Cloud Voice.
+
+`project.yml` bundles `../shared/classification.json` and `../shared/prompts` (folder) into the app and `../shared/fixtures/classification-cases.json` into the unit tests. Change prompts or the classification rule in `shared/`, never in Swift.
+
 **Capability:** background playback needs `UIBackgroundModes: [audio]` (set in [project.yml](project.yml) `info.properties`). No new SPM packages — `AVFoundation`, `MediaPlayer`, `FoundationModels` are system frameworks.
 
 ### Roadmap (phases)
 
 - **Phase 1 ✅ — Audio spine.** Text → offline TTS → `AudioTrack` → background player + mini/now-playing UI. Fully on-device, no credentials.
-- **Phase 2 — On-device AI.** `SummarizationService` over `FoundationModels.LanguageModelSession`; check `SystemLanguageModel.default.availability` and fall back gracefully (markdown → verbatim). Route `.summary` vs `.verbatim` in `TrackGenerator`. Code files need chunking for the context window.
-- **Phase 3 🟡 — GitHub (connect + browse + import shipped; AI summary of code still pending Phase 2).** [KeychainStore](Sources/Repocast/Services/KeychainStore.swift) (token), [GitHubClient](Sources/Repocast/Services/GitHubClient.swift) + [GitHubModels](Sources/Repocast/Services/GitHubModels.swift) (stateless `Sendable` REST over `URLSession`: validate / repos / contents / file), [GitHubAccount](Sources/Repocast/Services/GitHubAccount.swift) (app-lifetime connection state, injected like the player). Auth is a **pasted fine-grained PAT** (validated against `/user`, stored in Keychain) — OAuth device-flow is the later upgrade. UI in [ReposView.swift](Sources/Repocast/Views/ReposView.swift): connect sheet, add-repo picker, recursive file browser with multi-select → `TrackGenerator`. `RepoSource` is the persisted repo ([Models/RepoSource.swift](Sources/Repocast/Models/RepoSource.swift)). Files generate **verbatim** today (great for Markdown; code stays verbatim until Phase 2 summarization lands — `AudioTrack.SourceKind.detect(path:)` already tags code vs. markdown). **This is the second network surface** (see Privacy).
-- **Phase 4 — Playlists.** `Playlist` / `PlaylistItem` models, CRUD + reorder, AI-generated playlists (FoundationModels guided generation / `@Generable`).
-- **Phase 5 — Latest changes.** Fetch recent merged PRs / commits → spoken changelog track → smart playlist.
+- **Phase 2 ✅ — On-device AI.** `SummarizationService` over `FoundationModels.LanguageModelSession`; check `SystemLanguageModel.default.availability` and fall back gracefully (markdown → verbatim). Route `.summary` vs `.verbatim` in `TrackGenerator`. Code files need chunking for the context window.
+- **Phase 3 ✅ — GitHub.** [KeychainStore](Sources/Repocast/Services/KeychainStore.swift) (token), [GitHubClient](Sources/Repocast/Services/GitHubClient.swift) + [GitHubModels](Sources/Repocast/Services/GitHubModels.swift) (stateless `Sendable` REST over `URLSession`: validate / repos / contents / file), [GitHubAccount](Sources/Repocast/Services/GitHubAccount.swift) (app-lifetime connection state, injected like the player). Auth is a **pasted fine-grained PAT** (validated against `/user`, stored in Keychain) — OAuth device-flow is the later upgrade. UI in [ReposView.swift](Sources/Repocast/Views/ReposView.swift): connect sheet, add-repo picker, recursive file browser with multi-select → `TrackGenerator`. `RepoSource` is the persisted repo ([Models/RepoSource.swift](Sources/Repocast/Models/RepoSource.swift)). Code files are summarized on device when Apple Intelligence is available; Markdown is read verbatim (`AudioTrack.SourceKind.detect(path:)` tags code vs. markdown). **This is the second network surface** (see Privacy).
+- **Phase 4 ✅ — Playlists.** `Playlist` / `PlaylistItem` models, CRUD + reorder, AI-generated playlists (FoundationModels guided generation / `@Generable`).
+- **Repo tour, first slice ✅** — Intro + Architecture, on device and cloud (see Repo tour above).
+- **Next (ideation notes):** module describe/critique episodes, incremental "what changed" episodes with a per-repo cadence (needs the stored `lastIndexedCommit`), per-repo resume, prefetch, StoreKit subscription + minute quota in place of the beta allowlist.
 
 ### CarPlay
 
@@ -87,7 +99,7 @@ Audio-app CarPlay support lives in `Sources/Repocast/CarPlay/`: [CarPlaySceneDel
 
 ### Privacy
 
-Two network surfaces now: **Firebase Analytics** (anonymous) and **GitHub** (repo contents + access token). TTS is fully on-device; AI summarization will be too. **Voice notes** record with the microphone and are transcribed by `SFSpeechRecognizer` with `requiresOnDeviceRecognition = true` — the note audio and its text never leave the device (see [VoiceNoteRecorder](Sources/Repocast/Services/VoiceNoteRecorder.swift) / [SpeechTranscriptionService](Sources/Repocast/Services/SpeechTranscriptionService.swift); usage strings in [project.yml](project.yml)). The GitHub token lives in the **Keychain** (`KeychainStore.github`), only explicitly-connected repos are fetched, and repo data is sent **only to api.github.com** — never to our servers. Analytics events carry counts / enum raw values only, never repo text, file names, transcripts, or note contents. The `appstore/` privacy page and App Privacy answers disclose the GitHub connection, microphone use, and on-device speech recognition — keep them in sync when either surface changes.
+Network surfaces: **Firebase Analytics** (anonymous), **GitHub** (repo contents + access token), and — TestFlight only, after sign-in — the **cloud-voice backend** (public repo name + Cognito tokens; never the GitHub token). TTS is fully on-device; AI summarization will be too. **Voice notes** record with the microphone and are transcribed by `SFSpeechRecognizer` with `requiresOnDeviceRecognition = true` — the note audio and its text never leave the device (see [VoiceNoteRecorder](Sources/Repocast/Services/VoiceNoteRecorder.swift) / [SpeechTranscriptionService](Sources/Repocast/Services/SpeechTranscriptionService.swift); usage strings in [project.yml](project.yml)). The GitHub token lives in the **Keychain** (`KeychainStore.github`), only explicitly-connected repos are fetched, and repo data is sent **only to api.github.com** — never to our servers. Analytics events carry counts / enum raw values only, never repo text, file names, transcripts, or note contents. The `appstore/` privacy page and App Privacy answers disclose the GitHub connection, microphone use, and on-device speech recognition — keep them in sync when either surface changes.
 
 ## Analytics (Firebase)
 

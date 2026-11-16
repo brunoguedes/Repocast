@@ -1,0 +1,5 @@
+// Copy to Backend.xcconfig (gitignored) and fill in from `npx sst deploy`'s
+// outputs in backend/. Hosts only — no https:// (xcconfig treats // as a comment).
+REPOCAST_API_HOST = abc123.execute-api.ap-southeast-2.amazonaws.com
+REPOCAST_COGNITO_DOMAIN = repocast-production.auth.ap-southeast-2.amazoncognito.com
+REPOCAST_COGNITO_CLIENT_ID = 1a2b3c4d5e6f7g8h9i0j

@@ -15,6 +15,12 @@ protocol GitHubFetching: Sendable {
     func contents(owner: String, repo: String, path: String, ref: String?) async throws -> [GitHubContentEntry]
     /// UTF-8 text of a single file.
     func fileText(owner: String, repo: String, path: String, ref: String?) async throws -> String
+    /// SHA of the latest commit on `branch`.
+    func headCommit(owner: String, repo: String, branch: String) async throws -> String
+    /// Every file in the repo at `sha` (recursive git tree, blobs only).
+    func tree(owner: String, repo: String, sha: String) async throws -> GitHubTree
+    /// The README's text at `ref`, or `nil` when the repo has none.
+    func readme(owner: String, repo: String, ref: String?) async throws -> String?
 }
 
 enum GitHubError: LocalizedError {
@@ -69,6 +75,27 @@ struct GitHubClient: GitHubFetching {
             token: savedToken()
         )
         return file.decodedText() ?? ""
+    }
+
+    func headCommit(owner: String, repo: String, branch: String) async throws -> String {
+        let encoded = branch.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? branch
+        let commit: GitHubCommitRef = try await get("/repos/\(owner)/\(repo)/commits/\(encoded)", token: savedToken())
+        return commit.sha
+    }
+
+    func tree(owner: String, repo: String, sha: String) async throws -> GitHubTree {
+        try await get("/repos/\(owner)/\(repo)/git/trees/\(sha)?recursive=1", token: savedToken())
+    }
+
+    func readme(owner: String, repo: String, ref: String?) async throws -> String? {
+        var endpoint = "/repos/\(owner)/\(repo)/readme"
+        if let ref { endpoint += "?ref=\(ref)" }
+        do {
+            let file: GitHubFileContent = try await get(endpoint, token: savedToken())
+            return file.decodedText()
+        } catch GitHubError.http(status: 404, _) {
+            return nil
+        }
     }
 
     // MARK: Internals

@@ -36,6 +36,8 @@ struct SettingsView: View {
                     }
                 }
 
+                CloudSettingsSection()
+
                 Section("Voice") {
                     Picker("Voice", selection: $voiceIdentifier) {
                         Text("System Default").tag("")

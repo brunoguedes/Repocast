@@ -35,6 +35,12 @@ targets:
         excludes:
           - "**/.DS_Store"
           - "**/*.md"
+      # The tour contract shared with backend/ — see the root CLAUDE.md.
+      - path: ../shared/classification.json
+        buildPhase: resources
+      - path: ../shared/prompts
+        type: folder
+        buildPhase: resources
     resources:
       - path: Sources/Repocast/Resources
     info:
@@ -43,6 +49,11 @@ targets:
         CFBundleDisplayName: Repocast
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Cloud generation endpoints from Config/Backend.xcconfig (empty →
+        # cloud UI hidden). See BackendConfig.
+        RepocastAPIHost: $(REPOCAST_API_HOST)
+        RepocastCognitoDomain: $(REPOCAST_COGNITO_DOMAIN)
+        RepocastCognitoClientID: $(REPOCAST_COGNITO_CLIENT_ID)
         LSApplicationCategoryType: public.app-category.productivity
         LSRequiresIPhoneOS: true
         ITSAppUsesNonExemptEncryption: false
@@ -72,6 +83,9 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+    configFiles:
+      Debug: Config/Repocast.xcconfig
+      Release: Config/Repocast.xcconfig
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: au.com.bclgapps.Repocast
@@ -108,6 +122,9 @@ targets:
       # test bundle so per-package subfolders survive intact.
       - path: Tests/Fixtures
         type: folder
+        buildPhase: resources
+      # Classification test vectors shared with backend/.
+      - path: ../shared/fixtures/classification-cases.json
         buildPhase: resources
     dependencies:
       - target: Repocast

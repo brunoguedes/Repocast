@@ -30,6 +30,12 @@
 	<string>Repocast uses the microphone to record your voice notes.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Voice notes are transcribed to text on this device — the audio never leaves your iPhone.</string>
+	<key>RepocastAPIHost</key>
+	<string>$(REPOCAST_API_HOST)</string>
+	<key>RepocastCognitoClientID</key>
+	<string>$(REPOCAST_COGNITO_CLIENT_ID)</string>
+	<key>RepocastCognitoDomain</key>
+	<string>$(REPOCAST_COGNITO_DOMAIN)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

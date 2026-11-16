@@ -31,14 +31,23 @@ struct NarrationProgram: Sendable {
 
 /// Assembles a `NarrationProgram` from a package folder, honouring the format's
 /// degradation rules:
-/// - The stitched `<base>.mp3` (an mp3 with no `_partN` suffix) wins over the
-///   parts when present.
+/// - Audio is `.mp3` (Studio exports, cloud tour episodes), `.m4a`, or `.caf`
+///   (on-device tour episodes rendered by `SpeechSynthesisService`).
+/// - The stitched `<base>.<audio>` (no `_partN` suffix) wins over the parts
+///   when present.
 /// - Part order comes from the playlist; without a usable playlist, parts sort
 ///   by ID3 track number, then by numeric part suffix (part 10 after part 9).
 /// - Transcript per track: the `#EXT-TRANSCRIPT:` file → the same-stem `.txt` →
 ///   the mp3's embedded USLT lyrics → empty. The stitched file additionally
 ///   falls back to the part transcripts concatenated in order.
 struct NarrationProgramBuilder: Sendable {
+
+    /// File extensions a package's audio can use.
+    static let audioExtensions: Set<String> = ["mp3", "m4a", "caf"]
+
+    static func isAudio(_ fileName: String) -> Bool {
+        audioExtensions.contains((fileName as NSString).pathExtension.lowercased())
+    }
 
     /// Build the program for the package folder at `directory`, or `nil` when
     /// no audio belonging to `baseName` exists there.
@@ -49,8 +58,9 @@ struct NarrationProgramBuilder: Sendable {
         let title = playlist?.title ?? baseName
         let partNames = orderedPartFileNames(in: directory, names: names, baseName: baseName, playlist: playlist)
 
-        let stitchedName = "\(baseName).mp3"
-        if names.contains(stitchedName) {
+        if let stitchedName = names.sorted().first(where: {
+            Self.isAudio($0) && ($0 as NSString).deletingPathExtension == baseName
+        }) {
             let url = directory.appendingPathComponent(stitchedName)
             let tag = ID3Tag.read(from: url)
             let transcript = stitchedTranscript(
@@ -89,7 +99,7 @@ struct NarrationProgramBuilder: Sendable {
 
     // MARK: Part discovery + ordering
 
-    /// The part mp3s in playback order: the playlist's order when it lists
+    /// The part audio files in playback order: the playlist's order when it lists
     /// files that exist, else the naming-convention scan sorted by ID3 track
     /// number then numeric part suffix.
     private func orderedPartFileNames(
@@ -105,11 +115,11 @@ struct NarrationProgramBuilder: Sendable {
         }
     }
 
-    /// The mp3s following the `<base>_partN.mp3` naming convention.
+    /// The audio files following the `<base>_partN.<audio>` naming convention.
     static func partFileNames(in names: [String], baseName: String) -> [String] {
         names.filter { name in
             let stem = (name as NSString).deletingPathExtension
-            return (name as NSString).pathExtension.lowercased() == "mp3"
+            return isAudio(name)
                 && stem.hasPrefix("\(baseName)_part")
                 && partNumber(in: name) != nil
         }

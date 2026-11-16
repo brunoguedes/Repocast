@@ -1,0 +1,8 @@
+// Cloud-generation endpoints. Empty by default so the app builds and runs
+// with cloud features hidden; Backend.xcconfig (gitignored) fills them in.
+// Values are hosts without a scheme — xcconfig treats `//` as a comment.
+REPOCAST_API_HOST =
+REPOCAST_COGNITO_DOMAIN =
+REPOCAST_COGNITO_CLIENT_ID =
+
+#include? "Backend.xcconfig"

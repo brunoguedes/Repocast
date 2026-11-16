@@ -3,7 +3,7 @@
 Public privacy policy for **https://bclgapps.com.au/repocast-privacy**. This is the page the App Store **Privacy Policy URL** points to. App Store Connect requires this URL to be valid before review.
 
 **Effective date:** 2026-11-14
-**Last updated:** 2026-11-14
+**Last updated:** 2026-11-16
 
 ---
 
@@ -14,6 +14,7 @@ Public privacy policy for **https://bclgapps.com.au/repocast-privacy**. This is 
 - If you connect a GitHub token, it is stored in your device's **Keychain** and only ever sent to GitHub. Public repositories need no token at all.
 - Text-to-speech, AI code summaries, smart playlists and voice-note transcription all run **on your device**. The AI uses Apple Intelligence's on-device model; nothing you give it leaves your device.
 - Voice notes are recorded with the microphone only when you tap the mic, saved only on your device, and transcribed on your device.
+- **TestFlight beta only:** testers can opt in to **Cloud voice**, which makes repo-tour episodes on our servers. It is off unless you sign in, and it is not in the App Store version. See "Cloud voice (TestFlight beta)" below.
 - We collect anonymous, aggregate usage analytics (which tabs you open and which features get used) through Firebase Analytics so we can understand what's worth improving. This data contains **no** repository names, file contents, transcripts or notes. No accounts, no login, no advertising identifiers.
 
 If a privacy claim ever feels less than this, please email **bruno@bclgapps.com.au** — we want to hear about it.
@@ -61,9 +62,23 @@ To stop all of this: **Settings ▸ GitHub ▸ Disconnect** deletes the token fr
 
 ---
 
+## Cloud voice (TestFlight beta)
+
+This section applies only to TestFlight builds. The App Store version of Repocast has no cloud features and everything else in this policy describes it exactly.
+
+Beta testers can choose to make a repository's tour episodes (Intro, Architecture) in the cloud instead of on their device, for a longer script and a premium voice. Nothing is sent unless you sign in under **Settings ▸ Cloud Voice** and tap **Generate with Cloud Voice** on an episode. When you do:
+
+- **Sign-in:** you sign in with Apple through Amazon Cognito (AWS). We receive your Apple ID email address, or the private relay address if you choose "Hide My Email", and an account identifier. We use them only to let you in and to count your monthly generation minutes.
+- **What your device sends us:** the name of the **public** repository (for example `owner/name`) and which episode you want. Private repositories are not supported, and your GitHub token never leaves your device.
+- **What our servers do with it:** read that public repository from GitHub; write the episode script with **Claude** (Anthropic) running on **Amazon Bedrock**; record it with **ElevenLabs** text-to-speech; and store the script and audio in Amazon S3 so the app can download it. Episodes are built from public repositories and are shared between everyone who asks for the same repository and commit.
+- **What we store:** your account (email and identifier) and minutes used per month, in AWS (Amazon DynamoDB and Cognito); generated scripts (kept 90 days) and audio, in Amazon S3.
+- **Deleting it:** **Settings ▸ Cloud Voice ▸ Delete Cloud Account** removes your sign-in and usage records from our servers. Episodes already downloaded stay on your device until you delete them.
+
+---
+
 ## What data the app does not collect
 
-- We run no servers of our own. Apart from requests to GitHub (described above) and the anonymous Firebase Analytics usage data (described in "Usage analytics" below), no data is sent off your device.
+- We run no servers of our own for the App Store version. Apart from requests to GitHub (described above) and the anonymous Firebase Analytics usage data (described in "Usage analytics" below), no data is sent off your device.
 - **Your repositories, files, transcripts and generated audio never reach us.** They move only between your device and GitHub, and are stored only on your device.
 - **Your voice notes never leave your device at all** — not the recording, not the transcript (see "Voice notes and speech recognition" below).
 - **Your GitHub token never reaches us.** It is stored in the Keychain and only ever sent to GitHub.

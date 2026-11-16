@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 /// Minimal Keychain wrapper for secrets that must not live in `UserDefaults` —
-/// today just the GitHub access token. Generic-password items keyed by
+/// the GitHub access token and the cloud-generation (Cognito) tokens. Generic-password items keyed by
 /// `(service, account)`.
 struct KeychainStore: Sendable {
     let service: String
@@ -10,6 +10,9 @@ struct KeychainStore: Sendable {
     /// The store the GitHub token lives in.
     static let github = KeychainStore(service: "au.com.bclgapps.Repocast.github")
     static let tokenAccount = "github-token"
+
+    /// The store the cloud-generation tokens live in — see `CloudAccount`.
+    static let cloud = KeychainStore(service: "au.com.bclgapps.Repocast.cloud")
 
     @discardableResult
     func save(_ value: String, account: String) -> Bool {

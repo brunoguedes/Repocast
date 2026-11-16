@@ -96,4 +96,34 @@ extension AnalyticsService {
     static func logNoteDeleted() {
         log("note_deleted")
     }
+
+    // MARK: Repo tour
+
+    static func logTourIndexed(classification: String, files: Int) {
+        log("tour_indexed", ["classification": classification, "file_count": files])
+    }
+
+    static func logTourIndexFailed() {
+        log("tour_index_failed")
+    }
+
+    static func logTourEpisodeGenerated(type: String, executor: String, minutes: Int) {
+        log("tour_episode_generated", ["episode_type": type, "executor": executor, "minutes": minutes])
+    }
+
+    static func logTourEpisodeFailed(type: String, executor: String, stage: String) {
+        log("tour_episode_failed", ["episode_type": type, "executor": executor, "stage": stage])
+    }
+
+    static func logTourClassificationOverridden(classification: String) {
+        log("tour_classification_overridden", ["classification": classification])
+    }
+
+    static func logCloudSignedIn() {
+        log("cloud_signed_in")
+    }
+
+    static func logCloudAccountDeleted() {
+        log("cloud_account_deleted")
+    }
 }

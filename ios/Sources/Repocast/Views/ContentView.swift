@@ -10,6 +10,8 @@ struct ContentView: View {
     /// Same deal for the voice-note recorder: one session shared with CarPlay.
     private let recorder = VoiceNoteRecorder.shared
     @State private var account = GitHubAccount()
+    @State private var cloudAccount = CloudAccount()
+    @State private var tours = TourService()
     @State private var selectedTab = 0
     @State private var showNowPlaying = false
 
@@ -55,6 +57,8 @@ struct ContentView: View {
         .environment(player)
         .environment(recorder)
         .environment(account)
+        .environment(cloudAccount)
+        .environment(tours)
     }
 
     private func logTabScreen(_ tab: Int) {

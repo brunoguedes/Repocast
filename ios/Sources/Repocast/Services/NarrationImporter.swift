@@ -12,7 +12,9 @@ import SwiftData
 ///
 /// Identity is a hash of the source folder path + base name (not an array
 /// index or bookmark), so picking the same folder again — even after its
-/// contents were regenerated — updates the existing item in place.
+/// contents were regenerated — updates the existing item in place. Packages
+/// the app makes itself (tour episodes) go through `importLocalPackage` with a
+/// stable identity string instead of a path.
 @MainActor
 @Observable
 final class NarrationImporter {
@@ -42,18 +44,29 @@ final class NarrationImporter {
     /// success so callers can dismiss pickers / count results.
     @discardableResult
     func importPackage(from folderURL: URL, into context: ModelContext) async -> Bool {
-        phase = .importing
         // The document picker hands out security-scoped URLs; access lasts
         // only long enough to copy the folder into the app container.
         let isScoped = folderURL.startAccessingSecurityScopedResource()
         defer { if isScoped { folderURL.stopAccessingSecurityScopedResource() } }
+        return await importLocalPackage(
+            at: folderURL, identitySource: folderURL.standardizedFileURL.path, into: context
+        ) != nil
+    }
 
+    /// Import a package folder the app produced itself (a downloaded cloud
+    /// episode, an on-device tour episode). `identitySource` stands in for the
+    /// source path in the package's identity — pass something stable like
+    /// `tour://owner/name/architecture/cloud` so regenerating replaces the
+    /// same library item. Returns the package identifier, or `nil` on failure.
+    @discardableResult
+    func importLocalPackage(at folderURL: URL, identitySource: String, into context: ModelContext) async -> String? {
+        phase = .importing
         do {
             let names = try FileManager.default.contentsOfDirectory(atPath: folderURL.path)
             guard let baseName = Self.detectBaseName(in: names) else {
                 throw ImportError.notAPackage
             }
-            let sourcePath = folderURL.standardizedFileURL.path
+            let sourcePath = identitySource
             let identifier = Self.identifier(sourcePath: sourcePath, baseName: baseName)
 
             // Copy off the main actor — packages can be tens of MB.
@@ -80,7 +93,7 @@ final class NarrationImporter {
                 title: program.title,
                 baseName: baseName,
                 sourcePath: sourcePath,
-                voice: program.voice,
+                voice: program.voice ?? NarrationManifest.load(from: directory)?.voice,
                 partCount: partCount,
                 hasStitched: program.isStitched,
                 totalDuration: program.totalDuration,
@@ -90,11 +103,11 @@ final class NarrationImporter {
 
             phase = .idle
             AnalyticsService.logNarrationImported(parts: partCount, stitched: program.isStitched)
-            return true
+            return identifier
         } catch {
             phase = .failed((error as? ImportError)?.message ?? error.localizedDescription)
             AnalyticsService.logNarrationImportFailed()
-            return false
+            return nil
         }
     }
 
@@ -106,7 +119,7 @@ final class NarrationImporter {
     // MARK: Package identity
 
     /// The package's base name: the playlist file's stem, else the most common
-    /// `_partN` prefix, else a lone mp3's stem. `nil` when the folder holds no
+    /// `_partN` prefix, else a lone audio file's stem. `nil` when the folder holds no
     /// recognisable narration files.
     nonisolated static func detectBaseName(in names: [String]) -> String? {
         let stems = { (ext: String) in
@@ -117,7 +130,7 @@ final class NarrationImporter {
         if let playlist = stems("m3u8").first { return playlist }
 
         let partBases = names.compactMap { name -> String? in
-            guard (name as NSString).pathExtension.lowercased() == "mp3" else { return nil }
+            guard NarrationProgramBuilder.isAudio(name) else { return nil }
             let stem = (name as NSString).deletingPathExtension
             guard let match = stem.firstMatch(of: /^(.+)_part\d+$/) else { return nil }
             return String(match.1)
@@ -127,8 +140,9 @@ final class NarrationImporter {
             return commonest
         }
 
-        let mp3s = stems("mp3")
-        return mp3s.count == 1 ? mp3s[0] : nil
+        let audio = names.filter(NarrationProgramBuilder.isAudio)
+            .map { ($0 as NSString).deletingPathExtension }
+        return audio.count == 1 ? audio[0] : nil
     }
 
     nonisolated static func identifier(sourcePath: String, baseName: String) -> String {
