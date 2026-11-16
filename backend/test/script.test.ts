@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadPrompt } from "../src/lib/prompts.js";
-import { enforceCap, wordCount } from "../src/steps/script.js";
+import { enforceCap, wordCount } from "../src/core/tour.js";
 
 const words = (n: number) => Array.from({ length: n }, () => "word").join(" ");
 

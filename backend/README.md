@@ -43,6 +43,20 @@ npx sst dev            # or: npx sst deploy --stage production
 
 The deploy prints `API_BASE_URL`, `COGNITO_DOMAIN` and `COGNITO_CLIENT_ID`; copy them into `ios/Config/Backend.xcconfig`.
 
+## Run it locally
+
+The pipeline lives in `src/core/tour.ts` with no AWS in it; the Lambda steps wrap it with DynamoDB and S3, and `src/local/run.ts` wraps it with the file system. Nothing is deployed — GitHub and ElevenLabs are called directly and Claude through Bedrock with your local AWS credentials:
+
+```sh
+export BEDROCK_REGION=us-east-1                 # a region where your account has Claude access
+export ELEVENLABS_API_KEY=… ELEVENLABS_VOICE_ID=…  # only needed for audio
+npm run tour -- brunoguedes/Repocast --no-audio   # index + scripts only; read .local/…/<type>/script.md
+npm run tour -- brunoguedes/Repocast              # then record (scripts are cached, not rewritten)
+npm run tour -- brunoguedes/Repocast --episode architecture --fresh
+```
+
+Output goes to `.local/<owner>__<name>/<commit>/`: `index.json`, and per episode `script.json`, a readable `script.md`, and the narration package folder — the same files the cloud puts in S3. Import that folder in the app (Tracks ▸ Import Narration Folder) to hear it in the player and CarPlay.
+
 ## Tests
 
 ```sh
